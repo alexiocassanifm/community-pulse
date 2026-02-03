@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS public.anonymous_submissions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
   -- Professional Background
-  current_role TEXT,
+  professional_role TEXT,
   experience_level TEXT CHECK (experience_level IN ('junior', 'mid', 'senior', 'lead', 'executive', NULL)),
   industry TEXT,
   skills TEXT[],

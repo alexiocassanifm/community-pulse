@@ -18,7 +18,7 @@ export interface Database {
         Row: {
           id: string;
           // Professional Background
-          current_role: string | null;
+          professional_role: string | null;
           experience_level: ExperienceLevel | null;
           industry: string | null;
           skills: string[] | null;
@@ -51,7 +51,7 @@ export interface Database {
         Insert: {
           id?: string;
           // Professional Background
-          current_role?: string | null;
+          professional_role?: string | null;
           experience_level?: ExperienceLevel | null;
           industry?: string | null;
           skills?: string[] | null;
@@ -84,7 +84,7 @@ export interface Database {
         Update: {
           id?: string;
           // Professional Background
-          current_role?: string | null;
+          professional_role?: string | null;
           experience_level?: ExperienceLevel | null;
           industry?: string | null;
           skills?: string[] | null;

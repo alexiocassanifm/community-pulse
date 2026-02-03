@@ -9,8 +9,10 @@ import { FormNavigation } from "./form-navigation";
 import { PrivacyNotice } from "./privacy-notice";
 import { ProfessionalBackground } from "./sections/professional-background";
 import { Availability } from "./sections/availability";
-import { EventFormatsPlaceholder } from "./sections/event-formats-placeholder";
-import { TopicsPlaceholder } from "./sections/topics-placeholder";
+import { EventFormatsSection } from "./sections/event-formats-placeholder";
+import { TopicsSection } from "./sections/topics-placeholder";
+import { GdprConsent } from "./sections/gdpr-consent";
+import { SubmissionSuccessModal } from "./submission-success-modal";
 
 export function AnonymousFormContainer() {
   const {
@@ -23,6 +25,8 @@ export function AnonymousFormContainer() {
     goToStep,
     handleFormSubmit,
     isSubmitting,
+    showSuccessModal,
+    setShowSuccessModal,
   } = useMultiStepForm();
 
   // Determine which section to render
@@ -33,9 +37,11 @@ export function AnonymousFormContainer() {
       case 1:
         return <Availability form={form} />;
       case 2:
-        return <EventFormatsPlaceholder form={form} />;
+        return <EventFormatsSection form={form} />;
       case 3:
-        return <TopicsPlaceholder form={form} />;
+        return <TopicsSection form={form} />;
+      case 4:
+        return <GdprConsent form={form} />;
       default:
         return null;
     }
@@ -80,6 +86,11 @@ export function AnonymousFormContainer() {
           />
         </CardContent>
       </Card>
+
+      <SubmissionSuccessModal
+        open={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
     </FormProvider>
   );
 }

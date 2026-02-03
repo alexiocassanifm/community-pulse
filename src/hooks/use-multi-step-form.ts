@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAnonymousForm } from "./use-anonymous-form";
 import { AnonymousFormData } from "@/lib/validations/form-schema";
 import {
@@ -12,28 +11,8 @@ import {
 import { StepState, FORM_SECTIONS } from "@/types/form";
 import { useToast } from "@/hooks/use-toast";
 
-/**
- * Storage key for step states
- */
 const STEPS_STORAGE_KEY = "anonymous-form-steps";
 
-/**
- * Debounce utility function
- */
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-  return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-/**
- * Initialize step states
- */
 function initializeStepStates(): StepState[] {
   return FORM_SECTIONS.map((section, index) => ({
     sectionId: section.id,
@@ -42,36 +21,24 @@ function initializeStepStates(): StepState[] {
   }));
 }
 
-/**
- * Load step states from localStorage
- */
 function loadStepStates(): StepState[] | null {
   try {
     if (typeof window === "undefined") return null;
     const stored = localStorage.getItem(STEPS_STORAGE_KEY);
     if (!stored) return null;
     return JSON.parse(stored);
-  } catch (error) {
-    console.error("Failed to load step states:", error);
+  } catch {
     return null;
   }
 }
 
-/**
- * Save step states to localStorage
- */
 function saveStepStates(states: StepState[]): void {
   try {
     if (typeof window === "undefined") return;
     localStorage.setItem(STEPS_STORAGE_KEY, JSON.stringify(states));
-  } catch (error) {
-    console.error("Failed to save step states:", error);
-  }
+  } catch {}
 }
 
-/**
- * Check if a section has any filled fields
- */
 function isSectionFilled(
   data: Partial<AnonymousFormData>,
   sectionId: string
@@ -87,50 +54,44 @@ function isSectionFilled(
   });
 }
 
-/**
- * Enhanced multi-step form hook with auto-save and navigation
- */
 export function useMultiStepForm() {
   const { toast } = useToast();
 
-  // Load saved draft data
   const savedData = loadFormDraft();
   const form = useAnonymousForm(savedData || undefined);
 
-  // Initialize step state
-  const [currentStep, setCurrentStep] = useState(0);
-  const [stepStates, setStepStates] = useState<StepState[]>(() => {
+  const [currentStep, setCurrentStep] = useState(() => {
     const saved = loadStepStates();
     if (saved && saved.length === FORM_SECTIONS.length) {
-      // Find the first non-completed step or the last step
       const activeIndex = saved.findIndex((s) => s.status !== "completed");
-      const startIndex = activeIndex >= 0 ? activeIndex : saved.length - 1;
-      setCurrentStep(startIndex);
-      return saved;
+      return activeIndex >= 0 ? activeIndex : saved.length - 1;
     }
+    return 0;
+  });
+
+  const [stepStates, setStepStates] = useState<StepState[]>(() => {
+    const saved = loadStepStates();
+    if (saved && saved.length === FORM_SECTIONS.length) return saved;
     return initializeStepStates();
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Watch form values for auto-save
-  const formValues = form.watch();
-
-  // Debounced auto-save function
-  const debouncedSave = useCallback(
-    debounce((data: Partial<AnonymousFormData>) => {
-      const success = saveFormDraft(data);
-      if (!success) {
-        console.error("Failed to auto-save form data");
-      }
-    }, 1000),
-    []
-  );
-
-  // Auto-save on form changes
+  // Auto-save with subscription (not watch() at top level which causes infinite re-renders)
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    debouncedSave(formValues);
-  }, [formValues, debouncedSave]);
+    const subscription = form.watch((data) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        saveFormDraft(data as Partial<AnonymousFormData>);
+      }, 1000);
+    });
+    return () => {
+      subscription.unsubscribe();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [form]);
 
   // Save step states whenever they change
   useEffect(() => {
@@ -210,28 +171,19 @@ export function useMultiStepForm() {
     if (currentStep >= FORM_SECTIONS.length - 1) return;
 
     const currentSectionId = FORM_SECTIONS[currentStep].id;
-    const isFilled = isSectionFilled(formValues, currentSectionId);
+    const currentValues = form.getValues();
+    const isFilled = isSectionFilled(currentValues, currentSectionId);
 
-    // Mark current step as completed or visited
-    updateStepState(currentStep, {
-      status: isFilled ? "completed" : "visited",
-    });
-
-    // Move to next step
     const nextStep = currentStep + 1;
     setStepStates((prev) =>
       prev.map((state, i) => {
-        if (i === nextStep) {
-          return { ...state, status: "active" };
-        } else if (i === currentStep) {
-          return { ...state, status: isFilled ? "completed" : "visited" };
-        }
+        if (i === nextStep) return { ...state, status: "active" };
+        if (i === currentStep) return { ...state, status: isFilled ? "completed" : "visited" };
         return state;
       })
     );
-
     setCurrentStep(nextStep);
-  }, [currentStep, formValues, updateStepState]);
+  }, [currentStep, form]);
 
   /**
    * Navigate to previous step
@@ -269,13 +221,13 @@ export function useMultiStepForm() {
     setIsSubmitting(true);
 
     try {
-      // Submit to API
+      const currentValues = form.getValues();
       const response = await fetch("/api/submit-preferences", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formValues),
+        body: JSON.stringify(currentValues),
       });
 
       if (!response.ok) {
@@ -289,14 +241,40 @@ export function useMultiStepForm() {
         localStorage.removeItem(STEPS_STORAGE_KEY);
       }
 
-      // Show success toast
-      toast({
-        title: "Preferences submitted successfully",
-        description: "Thank you for sharing your preferences with us!",
-      });
+      // Show success modal
+      setShowSuccessModal(true);
 
-      // Reset form
-      form.reset();
+      // Reset form with empty defaults (not initial saved data)
+      form.reset({
+        professional_background: {
+          professional_role: "",
+          experience_level: undefined,
+          industry: "",
+          skills: [],
+        },
+        availability: {
+          preferred_days: [],
+          preferred_times: [],
+          frequency: undefined,
+        },
+        event_formats: {
+          format_presentations: false,
+          format_workshops: false,
+          format_discussions: false,
+          format_networking: false,
+          format_hackathons: false,
+          format_mentoring: false,
+          format_hybrid: undefined,
+          format_custom: "",
+        },
+        topics: {
+          predefined_topics: [],
+          custom_topics: "",
+        },
+        gdpr: {
+          data_retention_acknowledged: false,
+        },
+      });
       setStepStates(initializeStepStates());
       setCurrentStep(0);
     } catch (error) {
@@ -312,7 +290,7 @@ export function useMultiStepForm() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [formValues, form, toast]);
+  }, [form, toast]);
 
   return {
     form,
@@ -325,7 +303,8 @@ export function useMultiStepForm() {
     canNavigateToStep,
     handleFormSubmit,
     isSubmitting,
-    formValues,
+    showSuccessModal,
+    setShowSuccessModal,
   };
 }
 

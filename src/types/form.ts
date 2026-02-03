@@ -38,4 +38,10 @@ export const FORM_SECTIONS: FormSection[] = [
     description: "What are you curious about",
     icon: "lightbulb",
   },
+  {
+    id: "gdpr",
+    title: "Privacy Consent",
+    description: "Data usage agreement",
+    icon: "shield",
+  },
 ];

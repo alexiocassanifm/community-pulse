@@ -12,6 +12,15 @@ type AnonymousSubmissionInsert =
  */
 export async function POST(request: NextRequest) {
   try {
+    // Validate Content-Type
+    const contentType = request.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      return NextResponse.json(
+        { message: "Content-Type must be application/json" },
+        { status: 415 }
+      );
+    }
+
     // Parse request body
     const body = await request.json();
 
@@ -29,12 +38,24 @@ export async function POST(request: NextRequest) {
 
     const data = validationResult.data;
 
-    // Calculate completion percentage
+    // Explicitly validate GDPR consent is provided
+    if (!data.gdpr?.data_retention_acknowledged) {
+      return NextResponse.json(
+        {
+          message: "GDPR consent is required",
+          errors: { gdpr: ["You must acknowledge data retention policy"] },
+        },
+        { status: 400 }
+      );
+    }
+
+    // Calculate completion percentage (including GDPR as 5th section)
     const sections = [
       "professional_background",
       "availability",
       "event_formats",
       "topics",
+      "gdpr",
     ] as const;
 
     let filledSections = 0;
@@ -97,10 +118,19 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Supabase insert error:", error);
+
+      // Provide more specific error messages
+      if (error.code === "23505") {
+        return NextResponse.json(
+          { message: "Duplicate submission detected" },
+          { status: 409 }
+        );
+      }
+
       return NextResponse.json(
         {
           message: "Failed to submit preferences",
-          error: error.message,
+          error: process.env.NODE_ENV === "development" ? error.message : undefined,
         },
         { status: 500 }
       );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useAnonymousForm } from "./use-anonymous-form";
 import { AnonymousFormData } from "@/lib/validations/form-schema";
 import {
@@ -101,7 +101,7 @@ export function useMultiStepForm() {
   /**
    * Calculate overall progress percentage
    */
-  const calculateProgress = useCallback((): number => {
+  const progress = useMemo((): number => {
     const completedCount = stepStates.filter(
       (s) => s.status === "completed"
     ).length;
@@ -296,7 +296,7 @@ export function useMultiStepForm() {
     form,
     currentStep,
     stepStates,
-    progress: calculateProgress(),
+    progress,
     goToNext,
     goToPrevious,
     goToStep,

@@ -87,16 +87,29 @@ export function Availability({ form }: AvailabilityProps) {
           <Label>Preferred Days</Label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {DAYS.map((day) => (
-              <label
+              <div
                 key={day}
-                className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                onClick={() => toggleDay(day)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleDay(day);
+                  }
+                }}
+                role="checkbox"
+                aria-checked={preferredDays.includes(day)}
+                aria-labelledby={`day-label-${day}`}
+                tabIndex={0}
               >
                 <Checkbox
                   checked={preferredDays.includes(day)}
                   onCheckedChange={() => toggleDay(day)}
+                  tabIndex={-1}
+                  aria-hidden="true"
                 />
-                <span className="text-sm">{day}</span>
-              </label>
+                <span id={`day-label-${day}`} className="text-sm">{day}</span>
+              </div>
             ))}
           </div>
         </div>
@@ -105,16 +118,29 @@ export function Availability({ form }: AvailabilityProps) {
           <Label>Preferred Times</Label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {TIMES.map((time) => (
-              <label
+              <div
                 key={time.value}
-                className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                onClick={() => toggleTime(time.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleTime(time.value);
+                  }
+                }}
+                role="checkbox"
+                aria-checked={preferredTimes.includes(time.value)}
+                aria-labelledby={`time-label-${time.value}`}
+                tabIndex={0}
               >
                 <Checkbox
                   checked={preferredTimes.includes(time.value)}
                   onCheckedChange={() => toggleTime(time.value)}
+                  tabIndex={-1}
+                  aria-hidden="true"
                 />
-                <span className="text-sm">{time.label}</span>
-              </label>
+                <span id={`time-label-${time.value}`} className="text-sm">{time.label}</span>
+              </div>
             ))}
           </div>
         </div>

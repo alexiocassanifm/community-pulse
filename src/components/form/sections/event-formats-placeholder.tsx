@@ -43,10 +43,32 @@ export function EventFormatsSection({ form }: EventFormatsSectionProps) {
     }
   };
 
+  type EventFormatBooleanField =
+    | 'event_formats.format_presentations'
+    | 'event_formats.format_workshops'
+    | 'event_formats.format_discussions'
+    | 'event_formats.format_networking'
+    | 'event_formats.format_hackathons'
+    | 'event_formats.format_mentoring';
+
   const toggleFormat = (formatId: string) => {
-    const fieldName = `event_formats.format_${formatId}` as keyof AnonymousFormData;
+    const fieldMap: Record<string, EventFormatBooleanField> = {
+      presentations: 'event_formats.format_presentations',
+      workshops: 'event_formats.format_workshops',
+      discussions: 'event_formats.format_discussions',
+      networking: 'event_formats.format_networking',
+      hackathons: 'event_formats.format_hackathons',
+      mentoring: 'event_formats.format_mentoring',
+    };
+
+    const fieldName = fieldMap[formatId];
+    if (!fieldName) {
+      console.warn(`Invalid format ID: ${formatId}`);
+      return;
+    }
+
     const currentValue = getFormatValue(formatId);
-    setValue(fieldName as any, !currentValue, { shouldDirty: true });
+    setValue(fieldName, !currentValue, { shouldDirty: true });
   };
 
   const handleCustomFormatChange = (
@@ -78,23 +100,36 @@ export function EventFormatsSection({ form }: EventFormatsSectionProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {EVENT_FORMATS.map((format) => (
-              <label
+              <div
                 key={format.id}
-                className="flex items-start gap-3 p-3 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors"
+                className="flex items-start gap-3 p-3 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                onClick={() => toggleFormat(format.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleFormat(format.id);
+                  }
+                }}
+                role="checkbox"
+                aria-checked={getFormatValue(format.id)}
+                aria-labelledby={`format-label-${format.id}`}
+                aria-describedby={`format-desc-${format.id}`}
+                tabIndex={0}
               >
                 <Checkbox
                   checked={getFormatValue(format.id)}
                   onCheckedChange={() => toggleFormat(format.id)}
                   className="mt-1"
-                  aria-label={`Select ${format.label}`}
+                  tabIndex={-1}
+                  aria-hidden="true"
                 />
                 <div className="flex-1 space-y-1">
-                  <span className="text-sm font-medium">{format.label}</span>
-                  <p className="text-xs text-muted-foreground">
+                  <span id={`format-label-${format.id}`} className="text-sm font-medium">{format.label}</span>
+                  <p id={`format-desc-${format.id}`} className="text-xs text-muted-foreground">
                     {format.description}
                   </p>
                 </div>
-              </label>
+              </div>
             ))}
           </div>
         </div>

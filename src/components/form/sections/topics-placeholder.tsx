@@ -67,17 +67,29 @@ export function TopicsSection({ form }: TopicsSectionProps) {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {categoryTopics.map((topic) => (
-                    <label
+                    <div
                       key={topic.id}
-                      className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors"
+                      className="flex items-center gap-2 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                      onClick={() => toggleTopic(topic.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleTopic(topic.id);
+                        }
+                      }}
+                      role="checkbox"
+                      aria-checked={selectedTopics.includes(topic.id)}
+                      aria-labelledby={`topic-label-${topic.id}`}
+                      tabIndex={0}
                     >
                       <Checkbox
                         checked={selectedTopics.includes(topic.id)}
                         onCheckedChange={() => toggleTopic(topic.id)}
-                        aria-label={`Select ${topic.label}`}
+                        tabIndex={-1}
+                        aria-hidden="true"
                       />
-                      <span className="text-sm">{topic.label}</span>
-                    </label>
+                      <span id={`topic-label-${topic.id}`} className="text-sm">{topic.label}</span>
+                    </div>
                   ))}
                 </div>
               </div>

@@ -2,6 +2,7 @@
 
 import { UseFormReturn } from "react-hook-form";
 import { AnonymousFormData } from "@/lib/validations/form-schema";
+import { ExperienceLevel } from "@/types/database.types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -54,8 +55,8 @@ export function ProfessionalBackground({ form }: ProfessionalBackgroundProps) {
             onValueChange={(value) =>
               setValue(
                 "professional_background.experience_level",
-                value as AnonymousFormData["professional_background"] extends { experience_level?: infer T } ? T : never,
-                { shouldDirty: true }
+                value as ExperienceLevel,
+                { shouldDirty: true, shouldValidate: true }
               )
             }
           >

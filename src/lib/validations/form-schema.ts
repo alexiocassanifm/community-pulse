@@ -51,19 +51,21 @@ export const topicsSchema = z.object({
  * GDPR Section Schema
  */
 export const gdprSchema = z.object({
-  data_retention_acknowledged: z.boolean(),
+  data_retention_acknowledged: z.boolean().refine((val) => val === true, {
+    message: "You must acknowledge the data retention policy to submit"
+  }),
 });
 
 /**
  * Combined Anonymous Form Schema
- * All fields are optional to allow users to submit with minimal information
+ * All fields are optional except GDPR consent which is required for submission
  */
 export const anonymousFormSchema = z.object({
   professional_background: professionalBackgroundSchema.optional(),
   availability: availabilitySchema.optional(),
   event_formats: eventFormatsSchema.optional(),
   topics: topicsSchema.optional(),
-  gdpr: gdprSchema.optional(),
+  gdpr: gdprSchema,
 });
 
 /**

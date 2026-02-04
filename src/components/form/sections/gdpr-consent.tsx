@@ -40,7 +40,7 @@ export function GdprConsent({ form }: GdprConsentProps) {
       <div className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
         <Checkbox
           id="data_retention_acknowledged"
-          checked={isAcknowledged || false}
+          checked={isAcknowledged === true}
           onCheckedChange={(checked) =>
             setValue("gdpr.data_retention_acknowledged", checked === true, {
               shouldDirty: true,

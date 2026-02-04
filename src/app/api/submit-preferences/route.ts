@@ -9,9 +9,15 @@ type AnonymousSubmissionInsert =
 /**
  * POST /api/submit-preferences
  * Submit anonymous form preferences
+ *
+ * TODO: Implement rate limiting to prevent spam/abuse
+ * Consider using @upstash/ratelimit or similar middleware
+ * Recommended: 5 submissions per IP per hour for anonymous forms
  */
 export async function POST(request: NextRequest) {
   try {
+    // TODO: Add rate limiting check here before processing request
+
     // Validate Content-Type
     const contentType = request.headers.get("content-type");
     if (!contentType?.includes("application/json")) {
@@ -38,16 +44,8 @@ export async function POST(request: NextRequest) {
 
     const data = validationResult.data;
 
-    // Explicitly validate GDPR consent is provided
-    if (!data.gdpr?.data_retention_acknowledged) {
-      return NextResponse.json(
-        {
-          message: "GDPR consent is required",
-          errors: { gdpr: ["You must acknowledge data retention policy"] },
-        },
-        { status: 400 }
-      );
-    }
+    // GDPR consent is now enforced by the schema (z.literal(true))
+    // No need for explicit validation here
 
     // Calculate completion percentage (including GDPR as 5th section)
     const sections = [
@@ -101,9 +99,8 @@ export async function POST(request: NextRequest) {
       predefined_topics: data.topics?.predefined_topics || null,
       custom_topics: data.topics?.custom_topics || null,
 
-      // GDPR
-      data_retention_acknowledged:
-        data.gdpr?.data_retention_acknowledged || false,
+      // GDPR (cast to boolean since z.literal(true) is validated above)
+      data_retention_acknowledged: true,
 
       // Metadata
       submission_timestamp: new Date().toISOString(),

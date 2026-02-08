@@ -31,6 +31,22 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Create FairMind MCP Config
+        run: |
+          cat > /tmp/fairmind-mcp.json << EOF
+          {
+            "mcpServers": {
+              "FairMind": {
+                "type": "http",
+                "url": "https://project-context.mindstream.fairmind.ai/mcp/mcp",
+                "headers": {
+                  "Authorization": "Bearer ${{ secrets.FAIRMIND_API_KEY }}"
+                }
+              }
+            }
+          }
+          EOF
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
@@ -38,7 +54,37 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
+          claude_args: '--mcp-config /tmp/fairmind-mcp.json --allowedTools "mcp__FairMind__*"'
+          prompt: |
+            /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}
 
+            ## FairMind Requirements Verification
+
+            After the standard code review, verify implementation coherence with FairMind using a journal-first approach to save tokens:
+
+            ### Phase 1: Journal Check (always do this first)
+            1. Look for journal files in the PR diff under `fairmind/journals/`. They follow naming `TASK-{ID}_{agent}_journal.md`.
+            2. If journal(s) found, read them. They contain: overview, work log, files modified, technical decisions, outcomes.
+            3. Extract the TASK IDs referenced in the journal filenames.
+
+            ### Phase 2: FairMind Task Lookup
+            1. Use `mcp__FairMind__General_list_work_sessions` with project_id `6981fb9c4b2c601246796a08` to find active sessions.
+            2. Use `mcp__FairMind__Studio_get_task` with the TASK IDs from the journal to get the task requirements, acceptance criteria, and implementation plan.
+            3. If no TASK ID found in journals or filenames, use PR title/branch to search tasks via `mcp__FairMind__Studio_list_development_tasks_by_session`.
+
+            ### Phase 3: Coherence Assessment
+            **If journal exists and is complete:**
+            - Compare journal's declared work (outcomes, files modified, decisions) against FairMind task requirements and acceptance criteria.
+            - This is a text-vs-text comparison — no need to read all code files.
+
+            **If journal is missing, incomplete, or declares incoherence:**
+            - Fall back to analyzing the actual code diff against FairMind task requirements.
+            - Check acceptance criteria coverage in the code changes.
+
+            ### Phase 4: Report
+            Add a "## Requirements Coherence (FairMind)" section with:
+            - Matched task/user story ID + title
+            - Journal status: Present & Complete / Present & Incomplete / Missing
+            - Coherence assessment: Aligned / Partially Aligned / Divergent
+            - Specific observations about alignment or gaps
+            - If journal declares something not in the task (scope creep) or task requires something not in journal (missing work), flag it

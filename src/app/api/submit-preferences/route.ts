@@ -1,23 +1,23 @@
+import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase/client";
+import { supabaseAdmin } from "@/lib/supabase/server";
 import { anonymousFormSchema } from "@/lib/validations/form-schema";
 import { Database } from "@/types/database.types";
 
 type AnonymousSubmissionInsert =
   Database["public"]["Tables"]["anonymous_submissions"]["Insert"];
 
+function hashIP(ip: string): string {
+  return createHash("sha256").update(ip).digest("hex");
+}
+
 /**
  * POST /api/submit-preferences
- * Submit anonymous form preferences
- *
- * TODO: Implement rate limiting to prevent spam/abuse
- * Consider using @upstash/ratelimit or similar middleware
- * Recommended: 5 submissions per IP per hour for anonymous forms
+ * Submit anonymous form preferences with duplicate detection
  */
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Add rate limiting check here before processing request
-
     // Validate Content-Type
     const contentType = request.headers.get("content-type");
     if (!contentType?.includes("application/json")) {
@@ -26,6 +26,12 @@ export async function POST(request: NextRequest) {
         { status: 415 }
       );
     }
+
+    // Extract and hash IP for duplicate detection
+    const forwarded = request.headers.get("x-forwarded-for");
+    const realIp = request.headers.get("x-real-ip");
+    const ip = forwarded?.split(",")[0]?.trim() || realIp || "unknown";
+    const ipHash = hashIP(ip);
 
     // Parse request body
     const body = await request.json();
@@ -43,9 +49,28 @@ export async function POST(request: NextRequest) {
     }
 
     const data = validationResult.data;
+    const deviceId = body.device_id;
 
-    // GDPR consent is now enforced by the schema (z.literal(true))
-    // No need for explicit validation here
+    // Check for existing submission within 24h from same IP
+    const twentyFourHoursAgo = new Date(
+      Date.now() - 24 * 60 * 60 * 1000
+    ).toISOString();
+    const { data: existing } = await supabaseAdmin
+      .from("anonymous_submissions")
+      .select("id, submitted_at")
+      .eq("ip_hash", ipHash)
+      .gte("submitted_at", twentyFourHoursAgo)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      return NextResponse.json(
+        {
+          message:
+            "You have already submitted your preferences recently. Please try again later.",
+        },
+        { status: 429 }
+      );
+    }
 
     // Calculate completion percentage (including GDPR as 5th section)
     const sections = [
@@ -106,6 +131,11 @@ export async function POST(request: NextRequest) {
       submission_timestamp: new Date().toISOString(),
       form_version: "1.0",
       completion_percentage: completionPercentage,
+
+      // Duplicate Prevention
+      ip_hash: ipHash,
+      device_id: deviceId || null,
+      submitted_at: new Date().toISOString(),
     };
 
     // Insert into Supabase (anon role can only INSERT, not SELECT)
@@ -153,5 +183,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// TODO: Consider implementing rate limiting to prevent abuse
-// TODO: Add analytics/telemetry for submission tracking (anonymously)

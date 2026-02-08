@@ -81,10 +81,57 @@ jobs:
             - Fall back to analyzing the actual code diff against FairMind task requirements.
             - Check acceptance criteria coverage in the code changes.
 
+            ### Phase 3b: Spot-Check Code vs. Spec on Security-Sensitive Areas
+            Even when journals are complete and coherence is "Aligned", spot-check the actual code diff for these categories:
+            1. **Crypto & hashing**: Is a salt/HMAC used? Are algorithms appropriate? (e.g., plain SHA-256 on small input spaces is vulnerable to rainbow tables)
+            2. **Input validation**: Is any client-provided value stored or used without type checking, length limits, or sanitization?
+            3. **Concurrency**: Are check-then-act patterns (SELECT then INSERT, read then write) protected against race conditions? (e.g., use upsert, unique constraints, or transactions)
+            4. **Auth/session config**: Do server-side clients disable autoRefreshToken and persistSession?
+            5. **Cookie handling**: Is cookie parsing done safely? (`document.cookie.includes()` is unreliable — proper parsing with `split('; ')` is required)
+
+            For each issue found, trace it back to determine:
+            - **Implementation bug**: Code deviates from spec → flag as standard code review issue
+            - **Specification gap**: Code faithfully follows spec, but the spec itself is flawed → flag as "Specification Gap" in the report, referencing the work package file and line
+
             ### Phase 4: Report
-            Add a "## Requirements Coherence (FairMind)" section with:
-            - Matched task/user story ID + title
-            - Journal status: Present & Complete / Present & Incomplete / Missing
-            - Coherence assessment: Aligned / Partially Aligned / Divergent
-            - Specific observations about alignment or gaps
-            - If journal declares something not in the task (scope creep) or task requires something not in journal (missing work), flag it
+            Add a "## Requirements Coherence (FairMind)" section using this structure:
+
+            #### 4a: Summary
+            | Field | Value |
+            |-------|-------|
+            | User Story | US-{ID} — {title} |
+            | Tasks Verified | TASK-{ID}, TASK-{ID}, ... |
+            | Journal Status | ✅ Present & Complete / ⚠️ Present & Incomplete / ❌ Missing |
+            | Overall Coherence | ✅ Aligned / ⚠️ Partially Aligned / ❌ Divergent |
+
+            #### 4b: Acceptance Criteria Checklist
+            For EACH task, list every acceptance criterion from the FairMind task definition with a flag:
+            - ✅ = verified in journal/code, no issues
+            - ⚠️ = implemented but with quality/security concerns (detail in notes)
+            - ❌ = not implemented or missing
+
+            Format as a table per task:
+            **TASK-{ID}: {title}**
+            | # | Acceptance Criterion | Status | Notes |
+            |---|---------------------|--------|-------|
+            | 1 | {criterion text}    | ✅/⚠️/❌ | {brief note if ⚠️ or ❌} |
+
+            #### 4c: Security Spot-Check (Phase 3b Results)
+            | Category | Status | Details |
+            |----------|--------|---------|
+            | Crypto & hashing | ✅/⚠️/❌ | {findings or "No issues"} |
+            | Input validation | ✅/⚠️/❌ | {findings or "No issues"} |
+            | Concurrency | ✅/⚠️/❌ | {findings or "No issues"} |
+            | Auth/session config | ✅/⚠️/❌ | {findings or "No issues"} |
+            | Cookie handling | ✅/⚠️/❌ | {findings or "No issues"} |
+
+            #### 4d: Specification Gaps (only if found)
+            If any Phase 3b issue traces back to the work package spec rather than the implementation:
+            | Issue | Spec File | What the spec says | What it should say |
+            |-------|-----------|-------------------|-------------------|
+
+            If no spec gaps found, write: "No specification gaps identified."
+
+            #### 4e: Scope Check
+            - Scope creep (journal declares work not in task): {list or "None"}
+            - Missing work (task requires something not in journal): {list or "None"}

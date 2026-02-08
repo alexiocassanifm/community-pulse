@@ -8,6 +8,11 @@ import {
   loadFormDraft,
   clearFormDraft,
 } from "@/lib/form-persistence";
+import {
+  checkSubmissionStatus,
+  markAsSubmitted,
+  generateDeviceId,
+} from "@/lib/submission-storage";
 import { StepState, FORM_SECTIONS } from "@/types/form";
 import { useToast } from "@/hooks/use-toast";
 
@@ -77,6 +82,19 @@ export function useMultiStepForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [hasAlreadySubmitted, setHasAlreadySubmitted] = useState(false);
+  const [submissionTimestamp, setSubmissionTimestamp] = useState<
+    string | undefined
+  >();
+
+  // Check submission status on mount
+  useEffect(() => {
+    const status = checkSubmissionStatus();
+    if (status.hasSubmitted) {
+      setHasAlreadySubmitted(true);
+      setSubmissionTimestamp(status.timestamp);
+    }
+  }, []);
 
   // Auto-save with subscription (not watch() at top level which causes infinite re-renders)
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -218,7 +236,16 @@ export function useMultiStepForm() {
    * Handle form submission
    */
   const handleFormSubmit = useCallback(async () => {
+    // Client-side duplicate check
+    const status = checkSubmissionStatus();
+    if (status.hasSubmitted) {
+      setHasAlreadySubmitted(true);
+      setSubmissionTimestamp(status.timestamp);
+      return;
+    }
+
     setIsSubmitting(true);
+    const deviceId = generateDeviceId();
 
     try {
       const currentValues = form.getValues();
@@ -227,8 +254,14 @@ export function useMultiStepForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(currentValues),
+        body: JSON.stringify({ ...currentValues, device_id: deviceId }),
       });
+
+      if (response.status === 429) {
+        markAsSubmitted(deviceId);
+        setHasAlreadySubmitted(true);
+        return;
+      }
 
       if (!response.ok) {
         const error = await response.json();
@@ -240,6 +273,9 @@ export function useMultiStepForm() {
       if (typeof window !== "undefined") {
         localStorage.removeItem(STEPS_STORAGE_KEY);
       }
+
+      // Mark as submitted locally
+      markAsSubmitted(deviceId);
 
       // Show success modal
       setShowSuccessModal(true);
@@ -305,6 +341,8 @@ export function useMultiStepForm() {
     isSubmitting,
     showSuccessModal,
     setShowSuccessModal,
+    hasAlreadySubmitted,
+    submissionTimestamp,
   };
 }
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from "./MobileMenu";
@@ -16,6 +17,8 @@ const NAV_LINKS = [
 
 export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isLanding = pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,26 +48,27 @@ export function Navigation() {
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="text-xl font-bold tracking-tight">
-          Meetup App
+          Claude Code Milan
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </a>
-          ))}
+          {isLanding &&
+            NAV_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </a>
+            ))}
           <Button asChild size="sm">
             <Link href="/form">Share Preferences</Link>
           </Button>
         </nav>
 
-        <MobileMenu />
+        <MobileMenu isLanding={isLanding} />
       </div>
     </header>
   );

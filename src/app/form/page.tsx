@@ -3,7 +3,7 @@ import { AnonymousFormContainer } from "@/components/form/anonymous-form-contain
 import { FormErrorBoundary } from "@/components/error-boundary";
 
 export const metadata: Metadata = {
-  title: "Share Your Preferences | Meetup App",
+  title: "Share Your Preferences | Claude Code Milan",
   description:
     "Help us create better events by sharing your preferences anonymously. All fields are optional.",
 };

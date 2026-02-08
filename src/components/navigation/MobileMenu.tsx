@@ -20,7 +20,7 @@ const NAV_LINKS = [
   { label: "FAQ", href: "#faq" },
 ];
 
-export function MobileMenu() {
+export function MobileMenu({ isLanding }: { isLanding: boolean }) {
   const [open, setOpen] = useState(false);
 
   const handleLinkClick = (href: string) => {
@@ -41,18 +41,19 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent side="right" className="flex flex-col">
         <SheetHeader>
-          <SheetTitle className="text-left">Meetup App</SheetTitle>
+          <SheetTitle className="text-left">Claude Code Milan</SheetTitle>
         </SheetHeader>
         <nav className="mt-6 flex flex-1 flex-col gap-4">
-          {NAV_LINKS.map((link) => (
-            <button
-              key={link.href}
-              onClick={() => handleLinkClick(link.href)}
-              className="text-left text-base font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </button>
-          ))}
+          {isLanding &&
+            NAV_LINKS.map((link) => (
+              <button
+                key={link.href}
+                onClick={() => handleLinkClick(link.href)}
+                className="text-left text-base font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </button>
+            ))}
           <div className="mt-auto pb-6">
             <Button asChild className="w-full">
               <Link href="/form" onClick={() => setOpen(false)}>

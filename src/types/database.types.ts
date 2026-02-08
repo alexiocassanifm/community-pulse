@@ -43,6 +43,10 @@ export interface Database {
           form_version: string;
           completion_percentage: number;
           anonymous_reference_id: string | null;
+          // Duplicate Prevention
+          ip_hash: string;
+          device_id: string | null;
+          submitted_at: string;
           // GDPR
           data_retention_acknowledged: boolean;
           created_at: string;
@@ -76,6 +80,10 @@ export interface Database {
           form_version?: string;
           completion_percentage?: number;
           anonymous_reference_id?: string | null;
+          // Duplicate Prevention
+          ip_hash: string;
+          device_id?: string | null;
+          submitted_at?: string;
           // GDPR
           data_retention_acknowledged?: boolean;
           created_at?: string;
@@ -109,6 +117,10 @@ export interface Database {
           form_version?: string;
           completion_percentage?: number;
           anonymous_reference_id?: string | null;
+          // Duplicate Prevention
+          ip_hash?: string;
+          device_id?: string | null;
+          submitted_at?: string;
           // GDPR
           data_retention_acknowledged?: boolean;
           created_at?: string;
@@ -121,7 +133,10 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      cleanup_old_ip_hashes: {
+        Args: { retention_days?: number };
+        Returns: number;
+      };
     };
     Enums: {
       [_ in never]: never;

@@ -13,6 +13,7 @@ import { EventFormatsSection } from "./sections/event-formats-placeholder";
 import { TopicsSection } from "./sections/topics-placeholder";
 import { GdprConsent } from "./sections/gdpr-consent";
 import { SubmissionSuccessModal } from "./submission-success-modal";
+import { AlreadySubmittedMessage } from "./already-submitted-message";
 
 export function AnonymousFormContainer() {
   const {
@@ -27,7 +28,13 @@ export function AnonymousFormContainer() {
     isSubmitting,
     showSuccessModal,
     setShowSuccessModal,
+    hasAlreadySubmitted,
+    submissionTimestamp,
   } = useMultiStepForm();
+
+  if (hasAlreadySubmitted) {
+    return <AlreadySubmittedMessage timestamp={submissionTimestamp} />;
+  }
 
   // Determine which section to render
   const renderCurrentSection = () => {

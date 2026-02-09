@@ -9,11 +9,21 @@ export async function POST(request: NextRequest) {
     const origin = headersList.get("origin");
     const host = headersList.get("host");
 
-    if (origin && host && !origin.includes(host)) {
-      return NextResponse.json(
-        { message: "Forbidden" },
-        { status: 403 }
-      );
+    if (origin && host) {
+      try {
+        const originUrl = new URL(origin);
+        if (originUrl.host !== host) {
+          return NextResponse.json(
+            { message: "Forbidden" },
+            { status: 403 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { message: "Forbidden" },
+          { status: 403 }
+        );
+      }
     }
 
     const supabase = await createAuthClient();

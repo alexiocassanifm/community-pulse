@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
 
+function redirectWithCookies(
+  url: URL,
+  response: NextResponse
+): NextResponse {
+  const redirectResponse = NextResponse.redirect(url);
+  response.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie.name, cookie.value);
+  });
+  return redirectResponse;
+}
+
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({ request });
   const supabase = createSupabaseMiddlewareClient(request, response);
@@ -16,14 +27,14 @@ export async function middleware(request: NextRequest) {
 
   // Authenticated user on login page -> redirect to dashboard
   if (isLoginPage && user) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return redirectWithCookies(new URL("/dashboard", request.url), response);
   }
 
   // Unauthenticated user on protected route -> redirect to login
   if (isProtectedRoute && !isLoginPage && !user) {
     const loginUrl = new URL("/dashboard/login", request.url);
     loginUrl.searchParams.set("redirectTo", pathname);
-    return NextResponse.redirect(loginUrl);
+    return redirectWithCookies(loginUrl, response);
   }
 
   // Authenticated non-organizer on protected route -> sign out and redirect
@@ -38,7 +49,7 @@ export async function middleware(request: NextRequest) {
       await supabase.auth.signOut();
       const loginUrl = new URL("/dashboard/login", request.url);
       loginUrl.searchParams.set("error", "unauthorized");
-      return NextResponse.redirect(loginUrl);
+      return redirectWithCookies(loginUrl, response);
     }
   }
 

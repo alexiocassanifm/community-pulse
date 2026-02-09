@@ -19,14 +19,18 @@ export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const isLanding = pathname === "/";
+  const isDashboard = pathname.startsWith("/dashboard");
 
   useEffect(() => {
+    if (isDashboard) return;
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isDashboard]);
+
+  if (isDashboard) return null;
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,

@@ -128,6 +128,32 @@ export interface Database {
         };
         Relationships: [];
       };
+      organizers: {
+        Row: {
+          id: string;
+          email: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          email: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [{
+          foreignKeyName: "organizers_id_fkey";
+          columns: ["id"];
+          referencedRelation: "users";
+          referencedColumns: ["id"];
+        }];
+      };
     };
     Views: {
       [_ in never]: never;

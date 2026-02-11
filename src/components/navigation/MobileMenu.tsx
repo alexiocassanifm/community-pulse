@@ -54,7 +54,12 @@ export function MobileMenu({ isLanding }: { isLanding: boolean }) {
                 {link.label}
               </button>
             ))}
-          <div className="mt-auto pb-6">
+          <div className="mt-auto pb-6 space-y-2">
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/speaker/submit" onClick={() => setOpen(false)}>
+                Call for Speakers
+              </Link>
+            </Button>
             <Button asChild className="w-full">
               <Link href="/form" onClick={() => setOpen(false)}>
                 Share Preferences

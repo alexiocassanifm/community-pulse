@@ -18,6 +18,7 @@ import {
   BarChart3,
   Tags,
   Users,
+  Mic2,
   Menu,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/dashboard/formats", label: "Formats", icon: BarChart3 },
   { href: "/dashboard/topics", label: "Topics", icon: Tags },
   { href: "/dashboard/demographics", label: "Demographics", icon: Users },
+  { href: "/dashboard/speakers", label: "Speakers", icon: Mic2 },
 ];
 
 interface DashboardNavProps {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAuthClient } from "@/lib/supabase/auth-server";
 import { createServerClient } from "@/lib/supabase/server";
-import type { ExperienceLevel } from "@/types/database.types";
+import type { ExperienceLevel, ProfessionalBackground } from "@/types/database.types";
 
 const DAYS = [
   "monday",
@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
     const roleParam = searchParams.get("role");
     const experienceLevelParam = searchParams.get("experienceLevel");
     const industryParam = searchParams.get("industry");
+    const backgroundParam = searchParams.get("background");
 
     // Build query
     let query = supabase
@@ -73,6 +74,12 @@ export async function GET(request: NextRequest) {
     if (industryParam) {
       const industries = industryParam.split(",").map((i) => i.trim());
       query = query.in("industry", industries);
+    }
+    if (backgroundParam) {
+      const backgrounds = backgroundParam
+        .split(",")
+        .map((b) => b.trim()) as ProfessionalBackground[];
+      query = query.in("professional_background", backgrounds);
     }
 
     const { data: submissions, error: queryError } = await query;

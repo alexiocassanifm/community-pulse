@@ -2,7 +2,7 @@
 
 import { UseFormReturn } from "react-hook-form";
 import { AnonymousFormData } from "@/lib/validations/form-schema";
-import { ExperienceLevel } from "@/types/database.types";
+import type { ExperienceLevel, ProfessionalBackground } from "@/types/database.types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,6 +17,13 @@ interface ProfessionalBackgroundProps {
   form: UseFormReturn<AnonymousFormData>;
 }
 
+const BACKGROUND_TYPES = [
+  { value: "tech", label: "Tech / Engineering" },
+  { value: "business", label: "Business / Management" },
+  { value: "design", label: "Design / Creative" },
+  { value: "other", label: "Other" },
+];
+
 const EXPERIENCE_LEVELS = [
   { value: "junior", label: "Junior (0-2 years)" },
   { value: "mid", label: "Mid-Level (3-5 years)" },
@@ -27,6 +34,7 @@ const EXPERIENCE_LEVELS = [
 
 export function ProfessionalBackground({ form }: ProfessionalBackgroundProps) {
   const { register, setValue, watch } = form;
+  const backgroundType = watch("professional_background.professional_background");
   const experienceLevel = watch("professional_background.experience_level");
 
   return (
@@ -46,6 +54,31 @@ export function ProfessionalBackground({ form }: ProfessionalBackgroundProps) {
             placeholder="e.g. Software Engineer, Product Manager"
             {...register("professional_background.professional_role")}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="professional_background_type">Background Type</Label>
+          <Select
+            value={backgroundType || ""}
+            onValueChange={(value) =>
+              setValue(
+                "professional_background.professional_background",
+                value as ProfessionalBackground,
+                { shouldDirty: true, shouldValidate: true }
+              )
+            }
+          >
+            <SelectTrigger id="professional_background_type">
+              <SelectValue placeholder="Select your background type" />
+            </SelectTrigger>
+            <SelectContent>
+              {BACKGROUND_TYPES.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">

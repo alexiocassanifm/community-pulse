@@ -1,23 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAuthClient } from "@/lib/supabase/auth-server";
 import { createServerClient } from "@/lib/supabase/server";
-import type { HybridFormat, ExperienceLevel, ProfessionalBackground } from "@/types/database.types";
-
-const FORMAT_FIELDS = [
-  "presentations",
-  "workshops",
-  "discussions",
-  "networking",
-  "hackathons",
-  "mentoring",
-] as const;
-
-const HYBRID_VALUES: HybridFormat[] = [
-  "in_person",
-  "virtual",
-  "hybrid",
-  "no_preference",
-];
+import { PREDEFINED_TOPICS } from "@/constants/topics";
+import type { ExperienceLevel, ProfessionalBackground } from "@/types/database.types";
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,9 +50,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from("anonymous_submissions")
-      .select(
-        "format_presentations, format_workshops, format_discussions, format_networking, format_hackathons, format_mentoring, format_hybrid, format_custom"
-      );
+      .select("predefined_topics, custom_topics");
 
     if (startDate) {
       query = query.gte("submission_timestamp", startDate);
@@ -91,7 +74,7 @@ export async function GET(request: NextRequest) {
     const { data: submissions, error: queryError } = await query;
 
     if (queryError) {
-      console.error("Analytics formats query error:", queryError);
+      console.error("Analytics topics query error:", queryError);
       return NextResponse.json(
         { message: "Failed to fetch analytics data" },
         { status: 500 }
@@ -106,38 +89,58 @@ export async function GET(request: NextRequest) {
         ? Math.round((count / totalSubmissions) * 1000) / 10
         : 0;
 
-    const data: Record<string, { count: number; percentage: number }> = {};
-    for (const field of FORMAT_FIELDS) {
-      const count = rows.filter(
-        (r) => r[`format_${field}` as keyof typeof r] === true
-      ).length;
-      data[field] = { count, percentage: pct(count) };
-    }
-
-    const hybrid: Record<string, { count: number; percentage: number }> = {};
-    for (const value of HYBRID_VALUES) {
-      const count = rows.filter((r) => r.format_hybrid === value).length;
-      hybrid[value] = { count, percentage: pct(count) };
-    }
-
-    const customMap = new Map<string, number>();
+    // Count occurrences of each predefined topic
+    const topicCounts = new Map<string, number>();
     for (const row of rows) {
-      const text = row.format_custom?.trim();
-      if (text && text.length <= 200) {
-        const lower = text.toLowerCase();
-        const existing = customMap.get(lower);
-        customMap.set(lower, (existing ?? 0) + 1);
+      const topics = row.predefined_topics as string[] | null;
+      if (topics) {
+        for (const topicId of topics) {
+          topicCounts.set(topicId, (topicCounts.get(topicId) ?? 0) + 1);
+        }
       }
     }
 
-    const custom_formats = Array.from(customMap.entries())
+    // Group by category using PREDEFINED_TOPICS constant
+    const categories: Record<
+      string,
+      { id: string; topic: string; count: number; percentage: number }[]
+    > = {};
+
+    for (const { id, label, category } of PREDEFINED_TOPICS) {
+      const count = topicCounts.get(id) ?? 0;
+      if (!categories[category]) {
+        categories[category] = [];
+      }
+      categories[category].push({
+        id,
+        topic: label,
+        count,
+        percentage: pct(count),
+      });
+    }
+
+    // Sort topics within each category by count descending
+    for (const category of Object.keys(categories)) {
+      categories[category].sort((a, b) => b.count - a.count);
+    }
+
+    // Aggregate custom topics
+    const customMap = new Map<string, number>();
+    for (const row of rows) {
+      const text = (row.custom_topics as string | null)?.trim();
+      if (text && text.length <= 200) {
+        const lower = text.toLowerCase();
+        customMap.set(lower, (customMap.get(lower) ?? 0) + 1);
+      }
+    }
+
+    const custom_topics = Array.from(customMap.entries())
       .map(([text, count]) => ({ text, count }))
       .sort((a, b) => b.count - a.count);
 
     return NextResponse.json({
-      data,
-      hybrid,
-      custom_formats,
+      categories,
+      custom_topics,
       total_submissions: totalSubmissions,
       date_range: {
         start: startDate ?? null,
@@ -145,7 +148,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Analytics formats error:", error);
+    console.error("Analytics topics error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

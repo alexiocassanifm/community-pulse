@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Select,
   SelectContent,
@@ -15,18 +15,28 @@ export interface SegmentFilters {
   role: string;
   experienceLevel: string;
   industry: string;
+  background: string;
 }
 
 interface FilterOptions {
   roles: string[];
   levels: string[];
   industries: string[];
+  backgrounds: string[];
 }
+
+const BACKGROUND_LABELS: Record<string, string> = {
+  tech: "Tech / Engineering",
+  business: "Business / Management",
+  design: "Design / Creative",
+  other: "Other",
+};
 
 const EMPTY_FILTERS: SegmentFilters = {
   role: "",
   experienceLevel: "",
   industry: "",
+  background: "",
 };
 
 interface SegmentFilterProps {
@@ -37,24 +47,32 @@ interface SegmentFilterProps {
 export function SegmentFilter({ filters, onFilterChange }: SegmentFilterProps) {
   const [options, setOptions] = useState<FilterOptions | null>(null);
 
-  useEffect(() => {
-    async function fetchOptions() {
-      try {
-        const res = await fetch("/api/analytics/filter-options");
-        if (!res.ok) return;
-        const json: FilterOptions = await res.json();
-        setOptions(json);
-      } catch {
-        // silently fail — filters just won't show options
-      }
+  const fetchOptions = useCallback(async (background: string) => {
+    try {
+      const params = new URLSearchParams();
+      if (background) params.set("background", background);
+      const url = `/api/analytics/filter-options${params.toString() ? `?${params}` : ""}`;
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const json: FilterOptions = await res.json();
+      setOptions(json);
+    } catch {
+      // silently fail — filters just won't show options
     }
-    fetchOptions();
   }, []);
 
-  const activeCount = [filters.role, filters.experienceLevel, filters.industry].filter(Boolean).length;
+  useEffect(() => {
+    fetchOptions(filters.background);
+  }, [filters.background, fetchOptions]);
+
+  const activeCount = [filters.role, filters.experienceLevel, filters.industry, filters.background].filter(Boolean).length;
 
   function update(key: keyof SegmentFilters, value: string) {
     onFilterChange({ ...filters, [key]: value });
+  }
+
+  function updateBackground(value: string) {
+    onFilterChange({ ...filters, background: value, role: "", experienceLevel: "", industry: "" });
   }
 
   if (!options) return null;
@@ -62,12 +80,36 @@ export function SegmentFilter({ filters, onFilterChange }: SegmentFilterProps) {
   const hasOptions =
     options.roles.length > 0 ||
     options.levels.length > 0 ||
-    options.industries.length > 0;
+    options.industries.length > 0 ||
+    options.backgrounds.length > 0;
 
   if (!hasOptions) return null;
 
   return (
     <div className="flex flex-wrap items-end gap-3">
+      {options.backgrounds.length > 0 && (
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground">
+            Background
+          </label>
+          <Select
+            value={filters.background || undefined}
+            onValueChange={(v) => updateBackground(v)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All backgrounds" />
+            </SelectTrigger>
+            <SelectContent>
+              {options.backgrounds.map((b) => (
+                <SelectItem key={b} value={b}>
+                  {BACKGROUND_LABELS[b] ?? b}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       {options.roles.length > 0 && (
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground">

@@ -6,6 +6,11 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { FormatBarChart } from "@/components/dashboard/format-bar-chart";
 import { FormatPieChart } from "@/components/dashboard/format-pie-chart";
 import { HybridPreferenceChart } from "@/components/dashboard/hybrid-preference-chart";
+import {
+  SegmentFilter,
+  EMPTY_FILTERS,
+  type SegmentFilters,
+} from "@/components/dashboard/SegmentFilter";
 import { BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -69,12 +74,19 @@ export function FormatsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [chartView, setChartView] = useState<ChartView>("bar");
+  const [filters, setFilters] = useState<SegmentFilters>(EMPTY_FILTERS);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/analytics/formats");
+      const params = new URLSearchParams();
+      if (filters.role) params.set("role", filters.role);
+      if (filters.experienceLevel) params.set("experienceLevel", filters.experienceLevel);
+      if (filters.industry) params.set("industry", filters.industry);
+      if (filters.background) params.set("background", filters.background);
+      const qs = params.toString();
+      const res = await fetch(`/api/analytics/formats${qs ? `?${qs}` : ""}`);
       if (!res.ok) throw new Error("Failed to fetch format analytics");
       const json: FormatAnalyticsResponse = await res.json();
       setAnalytics(json);
@@ -83,7 +95,7 @@ export function FormatsContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     fetchData();
@@ -127,6 +139,7 @@ export function FormatsContent() {
 
   return (
     <div className="space-y-6">
+      <SegmentFilter filters={filters} onFilterChange={setFilters} />
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

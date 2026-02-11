@@ -111,7 +111,7 @@ export function AvailabilityHeatmap({ filters }: AvailabilityHeatmapProps) {
   } | null>(null);
 
   const activeFilterCount = filters
-    ? [filters.role, filters.experienceLevel, filters.industry].filter(Boolean)
+    ? [filters.role, filters.experienceLevel, filters.industry, filters.background].filter(Boolean)
         .length
     : 0;
 
@@ -124,6 +124,7 @@ export function AvailabilityHeatmap({ filters }: AvailabilityHeatmapProps) {
         if (filters?.experienceLevel)
           params.set("experienceLevel", filters.experienceLevel);
         if (filters?.industry) params.set("industry", filters.industry);
+        if (filters?.background) params.set("background", filters.background);
         const qs = params.toString();
         const url = `/api/analytics/availability${qs ? `?${qs}` : ""}`;
         const res = await fetch(url);
@@ -139,7 +140,7 @@ export function AvailabilityHeatmap({ filters }: AvailabilityHeatmapProps) {
       }
     }
     fetchData();
-  }, [filters?.role, filters?.experienceLevel, filters?.industry]);
+  }, [filters?.role, filters?.experienceLevel, filters?.industry, filters?.background]);
 
   const handleMouseEnter = useCallback(
     (cell: AvailabilityCell, e: React.MouseEvent) => {

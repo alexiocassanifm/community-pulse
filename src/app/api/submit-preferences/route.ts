@@ -100,6 +100,7 @@ export async function POST(request: NextRequest) {
     // Prepare data for database insertion
     const insertData: AnonymousSubmissionInsert = {
       // Professional Background
+      professional_background: data.professional_background?.professional_background || null,
       professional_role: data.professional_background?.professional_role || null,
       experience_level: data.professional_background?.experience_level || null,
       industry: data.professional_background?.industry || null,

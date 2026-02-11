@@ -4,6 +4,7 @@ import { z } from "zod";
  * Professional Background Section Schema
  */
 export const professionalBackgroundSchema = z.object({
+  professional_background: z.enum(["tech", "business", "design", "other"]).optional(),
   professional_role: z.string().max(100).optional(),
   experience_level: z
     .enum(["junior", "mid", "senior", "lead", "executive"])

@@ -1,7 +1,9 @@
-import { Users, CheckCircle, TrendingUp, Calendar } from "lucide-react";
+import { Users, CheckCircle, TrendingUp, Calendar, Monitor, Briefcase, Palette, MoreHorizontal } from "lucide-react";
 import { createServerClient } from "@/lib/supabase/server";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricsCard } from "./MetricsCard";
 import { EmptyState } from "./EmptyState";
+import { BackgroundDistributionChart } from "./background-distribution-chart";
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "N/A";
@@ -17,7 +19,7 @@ async function fetchOverviewData() {
 
   const { data: summary, error: summaryError } = await supabase
     .from("anonymous_submissions")
-    .select("completion_percentage, submission_timestamp");
+    .select("completion_percentage, submission_timestamp, professional_background");
 
   if (summaryError) {
     throw new Error("Failed to fetch analytics data");
@@ -71,11 +73,31 @@ async function fetchOverviewData() {
   if (last7 > prev7) trend = "up";
   else if (last7 < prev7) trend = "down";
 
+  // Background distribution
+  const bgCounts: Record<string, number> = {};
+  for (const row of summary ?? []) {
+    const bg = row.professional_background as string | null;
+    if (bg) {
+      bgCounts[bg] = (bgCounts[bg] ?? 0) + 1;
+    }
+  }
+  const backgroundDistribution = Object.entries(bgCounts).map(
+    ([value, count]) => ({
+      value,
+      count,
+      percentage:
+        totalSubmissions > 0
+          ? Math.round((count / totalSubmissions) * 1000) / 10
+          : 0,
+    })
+  );
+
   return {
     totalSubmissions,
     averageCompletion,
     dateRange: { start: dateRangeStart, end: dateRangeEnd },
     recentTrends: { last7Days: last7, previousPeriod: prev7, trend },
+    backgroundDistribution,
   };
 }
 
@@ -94,39 +116,81 @@ export async function MetricsGrid() {
   const trendDiff = data.recentTrends.last7Days - data.recentTrends.previousPeriod;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <MetricsCard
-        title="Total Submissions"
-        value={data.totalSubmissions}
-        description="All time submissions"
-        icon={Users}
-      />
-      <MetricsCard
-        title="Avg Completion"
-        value={`${data.averageCompletion}%`}
-        description="Average form completion rate"
-        icon={CheckCircle}
-      />
-      <MetricsCard
-        title="Recent Activity"
-        value={data.recentTrends.last7Days}
-        description="vs previous 7 days"
-        icon={TrendingUp}
-        trend={
-          data.recentTrends.trend !== "stable"
-            ? {
-                value: Math.abs(trendDiff),
-                isPositive: data.recentTrends.trend === "up",
-              }
-            : undefined
-        }
-      />
-      <MetricsCard
-        title="Data Period"
-        value={dateRangeText}
-        description="Submission date range"
-        icon={Calendar}
-      />
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <MetricsCard
+          title="Total Submissions"
+          value={data.totalSubmissions}
+          description="All time submissions"
+          icon={Users}
+        />
+        <MetricsCard
+          title="Avg Completion"
+          value={`${data.averageCompletion}%`}
+          description="Average form completion rate"
+          icon={CheckCircle}
+        />
+        <MetricsCard
+          title="Recent Activity"
+          value={data.recentTrends.last7Days}
+          description="vs previous 7 days"
+          icon={TrendingUp}
+          trend={
+            data.recentTrends.trend !== "stable"
+              ? {
+                  value: Math.abs(trendDiff),
+                  isPositive: data.recentTrends.trend === "up",
+                }
+              : undefined
+          }
+        />
+        <MetricsCard
+          title="Data Period"
+          value={dateRangeText}
+          description="Submission date range"
+          icon={Calendar}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <MetricsCard
+          title="Tech / Engineering"
+          value={data.backgroundDistribution.find((d) => d.value === "tech")?.count ?? 0}
+          description={`${data.backgroundDistribution.find((d) => d.value === "tech")?.percentage ?? 0}% of total`}
+          icon={Monitor}
+        />
+        <MetricsCard
+          title="Business / Management"
+          value={data.backgroundDistribution.find((d) => d.value === "business")?.count ?? 0}
+          description={`${data.backgroundDistribution.find((d) => d.value === "business")?.percentage ?? 0}% of total`}
+          icon={Briefcase}
+        />
+        <MetricsCard
+          title="Design / Creative"
+          value={data.backgroundDistribution.find((d) => d.value === "design")?.count ?? 0}
+          description={`${data.backgroundDistribution.find((d) => d.value === "design")?.percentage ?? 0}% of total`}
+          icon={Palette}
+        />
+        <MetricsCard
+          title="Other"
+          value={data.backgroundDistribution.find((d) => d.value === "other")?.count ?? 0}
+          description={`${data.backgroundDistribution.find((d) => d.value === "other")?.percentage ?? 0}% of total`}
+          icon={MoreHorizontal}
+        />
+      </div>
+
+      {data.backgroundDistribution.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-medium">
+              Background Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BackgroundDistributionChart data={data.backgroundDistribution} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

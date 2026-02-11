@@ -6,6 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export type ProfessionalBackground = 'tech' | 'business' | 'design' | 'other';
 export type ExperienceLevel = 'junior' | 'mid' | 'senior' | 'lead' | 'executive';
 export type PreferredTime = 'morning' | 'afternoon' | 'evening' | 'flexible';
 export type Frequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly';
@@ -18,6 +19,7 @@ export interface Database {
         Row: {
           id: string;
           // Professional Background
+          professional_background: ProfessionalBackground | null;
           professional_role: string | null;
           experience_level: ExperienceLevel | null;
           industry: string | null;
@@ -55,6 +57,7 @@ export interface Database {
         Insert: {
           id?: string;
           // Professional Background
+          professional_background?: ProfessionalBackground | null;
           professional_role?: string | null;
           experience_level?: ExperienceLevel | null;
           industry?: string | null;
@@ -92,6 +95,7 @@ export interface Database {
         Update: {
           id?: string;
           // Professional Background
+          professional_background?: ProfessionalBackground | null;
           professional_role?: string | null;
           experience_level?: ExperienceLevel | null;
           industry?: string | null;

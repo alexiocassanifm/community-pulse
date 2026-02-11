@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS public.anonymous_submissions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
   -- Professional Background
+  professional_background TEXT CHECK (professional_background IN ('tech', 'business', 'design', 'other', NULL)),
   professional_role TEXT,
   experience_level TEXT CHECK (experience_level IN ('junior', 'mid', 'senior', 'lead', 'executive', NULL)),
   industry TEXT,
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS public.anonymous_submissions (
 CREATE INDEX IF NOT EXISTS idx_submissions_timestamp ON public.anonymous_submissions(submission_timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_submissions_experience ON public.anonymous_submissions(experience_level);
 CREATE INDEX IF NOT EXISTS idx_submissions_industry ON public.anonymous_submissions(industry);
+CREATE INDEX IF NOT EXISTS idx_submissions_background ON public.anonymous_submissions(professional_background);
 CREATE INDEX IF NOT EXISTS idx_submissions_topics ON public.anonymous_submissions USING GIN(predefined_topics);
 
 -- Create updated_at trigger function

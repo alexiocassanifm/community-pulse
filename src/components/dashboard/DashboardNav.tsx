@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Calendar,
   BarChart3,
+  Tags,
   Users,
   Menu,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/dashboard/trends", label: "Trends", icon: TrendingUp },
   { href: "/dashboard/availability", label: "Availability", icon: Calendar },
   { href: "/dashboard/formats", label: "Formats", icon: BarChart3 },
+  { href: "/dashboard/topics", label: "Topics", icon: Tags },
   { href: "/dashboard/demographics", label: "Demographics", icon: Users },
 ];
 

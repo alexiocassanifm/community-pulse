@@ -58,40 +58,52 @@ export async function GET(request: NextRequest) {
     const industry = searchParams.get("industry");
     const background = searchParams.get("background");
 
-    let query = supabase
-      .from("anonymous_submissions")
-      .select("professional_role, experience_level, industry, skills");
+    function buildQuery() {
+      let q = supabase
+        .from("anonymous_submissions")
+        .select("professional_role, experience_level, industry, skills");
 
-    if (startDate) {
-      query = query.gte("submission_timestamp", startDate);
-    }
-    if (endDate) {
-      query = query.lte("submission_timestamp", endDate);
-    }
-    if (role) {
-      query = query.eq("professional_role", role);
-    }
-    if (experienceLevel) {
-      query = query.eq("experience_level", experienceLevel as ExperienceLevel);
-    }
-    if (industry) {
-      query = query.eq("industry", industry);
-    }
-    if (background) {
-      query = query.eq("professional_background", background as ProfessionalBackground);
+      if (startDate) q = q.gte("submission_timestamp", startDate);
+      if (endDate) q = q.lte("submission_timestamp", endDate);
+      if (role) q = q.eq("professional_role", role);
+      if (experienceLevel)
+        q = q.eq("experience_level", experienceLevel as ExperienceLevel);
+      if (industry) q = q.eq("industry", industry);
+      if (background)
+        q = q.eq("professional_background", background as ProfessionalBackground);
+      return q;
     }
 
-    const { data: submissions, error: queryError } = await query;
+    const PAGE_SIZE = 1000;
+    type SubmissionRow = {
+      professional_role: string | null;
+      experience_level: ExperienceLevel | null;
+      industry: string | null;
+      skills: string[] | null;
+    };
+    const rows: SubmissionRow[] = [];
+    let page = 0;
+    let hasMore = true;
 
-    if (queryError) {
-      console.error("Analytics demographics query error:", queryError);
-      return NextResponse.json(
-        { message: "Failed to fetch analytics data" },
-        { status: 500 }
-      );
+    while (hasMore) {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data: batch, error: queryError } = await buildQuery().range(from, to);
+
+      if (queryError) {
+        console.error("Analytics demographics query error:", queryError);
+        return NextResponse.json(
+          { message: "Failed to fetch analytics data" },
+          { status: 500 }
+        );
+      }
+
+      const items = batch ?? [];
+      rows.push(...items);
+      hasMore = items.length === PAGE_SIZE;
+      page++;
     }
 
-    const rows = submissions ?? [];
     const totalSubmissions = rows.length;
 
     const pct = (count: number) =>
@@ -185,6 +197,7 @@ export async function GET(request: NextRequest) {
       roles,
       experience,
       industries,
+      totalDistinctIndustries: industryMap.size,
       skills,
       date_range: {
         start: startDate ?? null,

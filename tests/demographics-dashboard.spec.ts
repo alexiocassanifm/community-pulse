@@ -28,6 +28,7 @@ const MOCK_DEMOGRAPHICS_RESPONSE = {
     { category: "Manufacturing", count: 8, percentage: 5.3 },
     { category: "Other", count: 20, percentage: 13.3 },
   ],
+  totalDistinctIndustries: 7,
   skills: [
     { category: "javascript", count: 80, percentage: 53.3 },
     { category: "react", count: 70, percentage: 46.7 },
@@ -47,6 +48,7 @@ const MOCK_EMPTY_RESPONSE = {
   roles: [],
   experience: [],
   industries: [],
+  totalDistinctIndustries: 0,
   skills: [],
   date_range: { start: null, end: null },
 };
@@ -124,6 +126,7 @@ test.describe("Demographics Dashboard - API Endpoint", () => {
     expect(MOCK_DEMOGRAPHICS_RESPONSE).toHaveProperty("roles");
     expect(MOCK_DEMOGRAPHICS_RESPONSE).toHaveProperty("experience");
     expect(MOCK_DEMOGRAPHICS_RESPONSE).toHaveProperty("industries");
+    expect(MOCK_DEMOGRAPHICS_RESPONSE).toHaveProperty("totalDistinctIndustries");
     expect(MOCK_DEMOGRAPHICS_RESPONSE).toHaveProperty("skills");
     expect(MOCK_DEMOGRAPHICS_RESPONSE).toHaveProperty("date_range");
 

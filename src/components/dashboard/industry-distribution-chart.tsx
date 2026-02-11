@@ -18,6 +18,7 @@ interface IndustryEntry {
 
 interface IndustryDistributionChartProps {
   data: IndustryEntry[];
+  totalDistinctIndustries?: number;
 }
 
 function CustomTooltip({
@@ -47,6 +48,7 @@ function CustomTooltip({
 
 export function IndustryDistributionChart({
   data,
+  totalDistinctIndustries,
 }: IndustryDistributionChartProps) {
   const height = Math.max(data.length * 48 + 16, 150);
 
@@ -54,7 +56,7 @@ export function IndustryDistributionChart({
   const nonOtherIndustries = data.filter((d) => d.category !== "Other");
   const topIndustry =
     nonOtherIndustries.length > 0 ? nonOtherIndustries[0].category : "N/A";
-  const industriesRepresented = data.length;
+  const industriesRepresented = totalDistinctIndustries ?? data.length;
   const top3Concentration =
     nonOtherIndustries
       .slice(0, 3)

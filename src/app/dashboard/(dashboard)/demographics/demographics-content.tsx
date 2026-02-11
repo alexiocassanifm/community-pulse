@@ -3,10 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/dashboard/EmptyState";
-import { RoleBreakdownChart } from "@/components/dashboard/RoleBreakdownChart";
-import { ExperienceLevelChart } from "@/components/dashboard/ExperienceLevelChart";
-import { IndustryDistributionChart } from "@/components/dashboard/IndustryDistributionChart";
-import { SkillsVisualization } from "@/components/dashboard/SkillsVisualization";
+import { RoleBreakdownChart } from "@/components/dashboard/role-breakdown-chart";
+import { ExperienceLevelChart } from "@/components/dashboard/experience-level-chart";
+import { IndustryDistributionChart } from "@/components/dashboard/industry-distribution-chart";
+import { SkillsVisualization } from "@/components/dashboard/skills-visualization";
 import {
   SegmentFilter,
   EMPTY_FILTERS,
@@ -25,6 +25,7 @@ interface DemographicsResponse {
   roles: DemographicEntry[];
   experience: DemographicEntry[];
   industries: DemographicEntry[];
+  totalDistinctIndustries: number;
   skills: DemographicEntry[];
   date_range: { start: string | null; end: string | null };
 }
@@ -94,13 +95,24 @@ export function DemographicsContent() {
     );
   }
 
+  const hasActiveFilters =
+    filters.role !== "" ||
+    filters.experienceLevel !== "" ||
+    filters.industry !== "" ||
+    filters.background !== "";
+
   if (!analytics || analytics.totalSubmissions === 0) {
     return (
-      <EmptyState
-        title="No Demographic Data"
-        description="Demographic data will appear here once participants submit their preferences."
-        icon={Users}
-      />
+      <div className="space-y-6">
+        {hasActiveFilters && (
+          <SegmentFilter filters={filters} onFilterChange={setFilters} />
+        )}
+        <EmptyState
+          title="No Demographic Data"
+          description="Demographic data will appear here once participants submit their preferences."
+          icon={Users}
+        />
+      </div>
     );
   }
 
@@ -143,7 +155,10 @@ export function DemographicsContent() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <IndustryDistributionChart data={analytics.industries} />
+              <IndustryDistributionChart
+                data={analytics.industries}
+                totalDistinctIndustries={analytics.totalDistinctIndustries}
+              />
             </CardContent>
           </Card>
         )}

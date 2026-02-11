@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { cn } from "@/lib/utils";
 
 interface RoleEntry {
   category: string;
@@ -94,13 +95,12 @@ export function RoleBreakdownChart({ data }: RoleBreakdownChartProps) {
             >
               <div className="flex items-start gap-2">
                 <div
-                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                    index === 0
-                      ? "bg-yellow-500 text-yellow-950"
-                      : index === 1
-                        ? "bg-gray-400 text-gray-950"
-                        : "bg-amber-700 text-amber-50"
-                  }`}
+                  className={cn(
+                    "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+                    index === 0 && "bg-yellow-500 text-yellow-950",
+                    index === 1 && "bg-gray-400 text-gray-950",
+                    index === 2 && "bg-amber-700 text-amber-50"
+                  )}
                 >
                   {index + 1}
                 </div>

@@ -67,6 +67,9 @@ export function Navigation() {
                 {link.label}
               </a>
             ))}
+          <Button asChild variant="outline" size="sm">
+            <Link href="/speaker/submit">Call for Speakers</Link>
+          </Button>
           <Button asChild size="sm">
             <Link href="/form">Share Preferences</Link>
           </Button>

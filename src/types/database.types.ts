@@ -132,6 +132,121 @@ export interface Database {
         };
         Relationships: [];
       };
+      speaker_submissions: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          talk_title: string;
+          format: string;
+          ai_tools_experience: string;
+          title_company: string | null;
+          anything_else: string | null;
+          status: string;
+          assigned_meetup: string | null;
+          access_token: string;
+          token_revoked: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          talk_title: string;
+          format: string;
+          ai_tools_experience: string;
+          title_company?: string | null;
+          anything_else?: string | null;
+          status?: string;
+          assigned_meetup?: string | null;
+          access_token?: string;
+          token_revoked?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          email?: string;
+          talk_title?: string;
+          format?: string;
+          ai_tools_experience?: string;
+          title_company?: string | null;
+          anything_else?: string | null;
+          assigned_meetup?: string | null;
+          status?: string;
+          access_token?: string;
+          token_revoked?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      speaker_messages: {
+        Row: {
+          id: string;
+          submission_id: string;
+          sender_type: string;
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          submission_id: string;
+          sender_type: string;
+          content: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          submission_id?: string;
+          sender_type?: string;
+          content?: string;
+          created_at?: string;
+        };
+        Relationships: [{
+          foreignKeyName: "speaker_messages_submission_id_fkey";
+          columns: ["submission_id"];
+          referencedRelation: "speaker_submissions";
+          referencedColumns: ["id"];
+        }];
+      };
+      speaker_status_history: {
+        Row: {
+          id: string;
+          submission_id: string;
+          old_status: string | null;
+          new_status: string;
+          changed_by: string;
+          message: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          submission_id: string;
+          old_status?: string | null;
+          new_status: string;
+          changed_by: string;
+          message?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          submission_id?: string;
+          old_status?: string | null;
+          new_status?: string;
+          changed_by?: string;
+          message?: string | null;
+          created_at?: string;
+        };
+        Relationships: [{
+          foreignKeyName: "speaker_status_history_submission_id_fkey";
+          columns: ["submission_id"];
+          referencedRelation: "speaker_submissions";
+          referencedColumns: ["id"];
+        }];
+      };
       organizers: {
         Row: {
           id: string;

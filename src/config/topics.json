@@ -1,0 +1,32 @@
+{
+  "topics": [
+    { "id": "web-development", "label": "Web Development", "category": "Development" },
+    { "id": "mobile-development", "label": "Mobile Development", "category": "Development" },
+    { "id": "backend-development", "label": "Backend Development", "category": "Development" },
+    { "id": "frontend-frameworks", "label": "Frontend Frameworks", "category": "Development" },
+    { "id": "devops-cicd", "label": "DevOps & CI/CD", "category": "Infrastructure" },
+    { "id": "cloud-platforms", "label": "Cloud Platforms", "category": "Infrastructure" },
+    { "id": "containerization", "label": "Containers & Orchestration", "category": "Infrastructure" },
+    { "id": "ai-ml", "label": "AI & Machine Learning", "category": "Data & AI" },
+    { "id": "data-engineering", "label": "Data Engineering", "category": "Data & AI" },
+    { "id": "llms-genai", "label": "LLMs & Generative AI", "category": "Data & AI" },
+    { "id": "cybersecurity", "label": "Cybersecurity", "category": "Security & Quality" },
+    { "id": "testing-qa", "label": "Testing & QA", "category": "Security & Quality" },
+    { "id": "open-source", "label": "Open Source", "category": "Community" },
+    { "id": "career-growth", "label": "Career Growth", "category": "Community" },
+    { "id": "system-design", "label": "System Design", "category": "Architecture" },
+    { "id": "microservices", "label": "Microservices", "category": "Architecture" },
+    { "id": "hands-on-labs", "label": "Hands-on Labs", "category": "Session Formats" },
+    { "id": "live-coding", "label": "Live Coding Sessions", "category": "Session Formats" },
+    { "id": "demo-sessions", "label": "Demo Sessions", "category": "Session Formats" }
+  ],
+  "categories": [
+    "Development",
+    "Infrastructure",
+    "Data & AI",
+    "Security & Quality",
+    "Community",
+    "Architecture",
+    "Session Formats"
+  ]
+}

@@ -7,9 +7,11 @@ Community events organizer app. Collects anonymous attendee preferences, manages
 
 ## Features
 
+- **Meetup management** — Create, edit, and publish meetups from the dashboard; upcoming meetups shown on homepage with Luma registration link or "Coming Soon" badge
 - **Anonymous preference form** — Multi-step form for attendees to share availability, topic interests, and format preferences without authentication
-- **Speaker portal** — Speakers submit talk proposals, track status, and communicate with organizers via a token-based portal
-- **Admin dashboard** — Analytics charts (demographics, trends, availability heatmap, topics, formats), speaker management with status workflows
+- **Speaker portal** — Speakers submit talk proposals with preferred meetup selection, track status, and communicate with organizers via a token-based portal
+- **Community link** — Admin-configurable Telegram/WhatsApp link displayed on homepage (Hero, CTA, GetInvolved sections)
+- **Admin dashboard** — Analytics charts (demographics, trends, availability heatmap, topics, formats), speaker and meetup management, site settings
 - **Email notifications** — Automated speaker emails (confirmation, status changes, new messages) via Resend
 
 ## Built With
@@ -110,6 +112,8 @@ npm install
    - `supabase/migrations/001_create_anonymous_submissions.sql`
    - `supabase/migrations/002_create_organizers_table.sql`
    - `supabase/migrations/003_create_speaker_submissions.sql`
+   - `supabase/migrations/004_create_meetups.sql`
+   - `supabase/migrations/005_create_site_settings.sql`
 4. Optionally seed sample data: run `supabase/seed.sql`
 
 ### 3. Create an organizer account
@@ -183,7 +187,7 @@ src/
   constants/              Static data (formats, roles, industries)
   types/                  TypeScript type definitions
 supabase/
-  migrations/             SQL migrations (3 files)
+  migrations/             SQL migrations (5 files)
   seed.sql                Sample data
 ```
 
@@ -253,7 +257,6 @@ Resolve any conflicts, especially in config files and environment variables.
 
 ## Roadmap
 
-- Improved meetup management
 - Luma API integration
 - _Open to suggestions — [open an issue](../../issues) to request features_
 

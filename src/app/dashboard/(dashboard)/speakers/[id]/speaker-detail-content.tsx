@@ -15,12 +15,20 @@ import {
 } from "@/components/ui/card";
 import { SpeakerStatusBadge } from "@/components/dashboard/speaker-status-badge";
 import { SPEAKER_FORMATS } from "@/constants/speakers";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   SpeakerSubmissionRow,
   SpeakerMessageRow,
   SpeakerStatusHistoryRow,
   SpeakerStatus,
 } from "@/types/speaker";
+import type { MeetupRow } from "@/types/meetup";
 
 function getFormatLabel(format: string): string {
   return SPEAKER_FORMATS.find((f) => f.value === format)?.label ?? format;
@@ -42,6 +50,7 @@ export function SpeakerDetailContent({ id }: { id: string }) {
   );
   const [messages, setMessages] = useState<SpeakerMessageRow[]>([]);
   const [history, setHistory] = useState<SpeakerStatusHistoryRow[]>([]);
+  const [meetups, setMeetups] = useState<MeetupRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");
   const [statusMeetup, setStatusMeetup] = useState("");
@@ -69,6 +78,10 @@ export function SpeakerDetailContent({ id }: { id: string }) {
 
   useEffect(() => {
     fetchDetail();
+    fetch("/api/meetups")
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setMeetups)
+      .catch(() => {});
   }, [fetchDetail]);
 
   const handleStatusChange = async (status: "accepted" | "rejected") => {
@@ -80,10 +93,16 @@ export function SpeakerDetailContent({ id }: { id: string }) {
         body: JSON.stringify({
           status,
           ...(statusMessage.trim() ? { message: statusMessage.trim() } : {}),
-          ...(statusMeetup.trim() ? { meetup: statusMeetup.trim() } : {}),
         }),
       });
       if (res.ok) {
+        if (status === "accepted" && statusMeetup) {
+          await fetch(`/api/speakers/admin/${id}/assign-meetup`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ meetup_id: statusMeetup }),
+          });
+        }
         setStatusAction(null);
         setStatusMessage("");
         setStatusMeetup("");
@@ -91,6 +110,17 @@ export function SpeakerDetailContent({ id }: { id: string }) {
       }
     } finally {
       setStatusUpdating(false);
+    }
+  };
+
+  const handleAssignMeetup = async (meetupId: string) => {
+    const res = await fetch(`/api/speakers/admin/${id}/assign-meetup`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ meetup_id: meetupId || null }),
+    });
+    if (res.ok) {
+      await fetchDetail();
     }
   };
 
@@ -171,11 +201,25 @@ export function SpeakerDetailContent({ id }: { id: string }) {
               </div>
             )}
             {submission.assigned_meetup && (
-              <div className="sm:col-span-2">
+              <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Assigned Meetup
                 </p>
-                <p className="text-sm font-medium">{submission.assigned_meetup}</p>
+                <p className="text-sm font-medium">
+                  {meetups.find((m) => m.id === submission.assigned_meetup)?.title ??
+                    submission.assigned_meetup}
+                </p>
+              </div>
+            )}
+            {submission.preferred_meetup && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Preferred Meetup
+                </p>
+                <p className="text-sm font-medium">
+                  {meetups.find((m) => m.id === submission.preferred_meetup)?.title ??
+                    submission.preferred_meetup}
+                </p>
               </div>
             )}
             <div>
@@ -231,14 +275,29 @@ export function SpeakerDetailContent({ id }: { id: string }) {
                     {statusAction === "accepted" ? "Accept" : "Reject"} this
                     submission
                   </p>
-                  {statusAction === "accepted" && (
-                    <input
-                      type="text"
-                      placeholder="Assigned meetup (e.g. Milan Meetup #3 — March 2026)"
+                  {statusAction === "accepted" && meetups.length > 0 && (
+                    <Select
                       value={statusMeetup}
-                      onChange={(e) => setStatusMeetup(e.target.value)}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    />
+                      onValueChange={setStatusMeetup}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Assign to a meetup (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {meetups
+                          .filter((m) => m.status !== "past")
+                          .map((m) => (
+                            <SelectItem key={m.id} value={m.id}>
+                              {m.title} —{" "}
+                              {new Date(m.date).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
                   )}
                   <Textarea
                     placeholder="Optional message to the speaker..."
@@ -274,6 +333,34 @@ export function SpeakerDetailContent({ id }: { id: string }) {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {submission.status === "accepted" && meetups.length > 0 && (
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium mb-2">Assign Meetup</p>
+              <Select
+                value={submission.assigned_meetup ?? ""}
+                onValueChange={handleAssignMeetup}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a meetup" />
+                </SelectTrigger>
+                <SelectContent>
+                  {meetups
+                    .filter((m) => m.status !== "past")
+                    .map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.title} —{" "}
+                        {new Date(m.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </CardContent>

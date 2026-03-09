@@ -1,4 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import { HeroSection } from "@/components/hero/HeroSection"
+import { UpcomingMeetupsSection } from "@/components/sections/UpcomingMeetupsSection"
 import { WhyShareSection } from "@/components/sections/WhyShareSection"
 import { HowItWorksSection } from "@/components/sections/HowItWorksSection"
 import { CallForSpeakersSection } from "@/components/sections/CallForSpeakersSection"
@@ -10,6 +13,7 @@ export default function Home() {
   return (
     <main>
       <HeroSection />
+      <UpcomingMeetupsSection />
       <WhyShareSection />
       <HowItWorksSection />
       <CallForSpeakersSection />

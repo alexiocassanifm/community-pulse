@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
         ai_tools_experience: data.ai_tools_experience,
         title_company: data.title_company || null,
         anything_else: data.anything_else || null,
+        ...(data.preferred_meetup ? { preferred_meetup: data.preferred_meetup } : {}),
       });
 
     if (insertError) {

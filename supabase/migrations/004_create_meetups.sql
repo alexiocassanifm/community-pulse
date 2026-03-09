@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS public.meetups (
 );
 
 -- Indexes
-CREATE INDEX idx_meetups_status ON public.meetups(status);
-CREATE INDEX idx_meetups_date ON public.meetups(date DESC);
+CREATE INDEX IF NOT EXISTS idx_meetups_status ON public.meetups(status);
+CREATE INDEX IF NOT EXISTS idx_meetups_date ON public.meetups(date DESC);
 
 -- Reuse existing updated_at trigger
 DROP TRIGGER IF EXISTS set_updated_at_meetups ON public.meetups;
@@ -37,21 +37,26 @@ CREATE POLICY "meetups_organizers_all"
   TO authenticated
   USING (
     EXISTS (SELECT 1 FROM public.organizers WHERE organizers.id = auth.uid())
+  )
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.organizers WHERE organizers.id = auth.uid())
   );
 
 -- RLS: service role full access
 CREATE POLICY "meetups_service_role_all"
   ON public.meetups FOR ALL
   TO service_role
-  USING (true);
+  USING (true)
+  WITH CHECK (true);
 
 -- Add preferred_meetup FK to speaker_submissions
 ALTER TABLE public.speaker_submissions
-  ADD COLUMN preferred_meetup UUID REFERENCES public.meetups(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS preferred_meetup UUID REFERENCES public.meetups(id) ON DELETE SET NULL;
 
 -- Migrate assigned_meetup from TEXT to UUID FK
+-- Note: existing TEXT column from migration 003 has no production data (pre-launch schema change)
 ALTER TABLE public.speaker_submissions
-  DROP COLUMN assigned_meetup;
+  DROP COLUMN IF EXISTS assigned_meetup;
 
 ALTER TABLE public.speaker_submissions
-  ADD COLUMN assigned_meetup UUID REFERENCES public.meetups(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS assigned_meetup UUID REFERENCES public.meetups(id) ON DELETE SET NULL;

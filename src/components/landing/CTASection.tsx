@@ -1,8 +1,18 @@
 import Link from "next/link"
+import { MessageCircle } from "lucide-react"
 import { SectionContainer } from "@/components/layout/SectionContainer"
 import { Button } from "@/components/ui/button"
+import type { CommunityLinkValue } from "@/types/settings"
 
-export function CTASection() {
+interface CTASectionProps {
+  communityLink?: CommunityLinkValue | null;
+}
+
+export function CTASection({ communityLink }: CTASectionProps) {
+  const showCommunityLink = communityLink?.enabled && communityLink.url;
+  const platformLabel =
+    communityLink?.platform === "whatsapp" ? "WhatsApp" : "Telegram";
+
   return (
     <SectionContainer id="cta" variant="accent">
       <div className="text-center">
@@ -10,8 +20,8 @@ export function CTASection() {
           Ready to Shape Our Next Meetup?
         </h2>
         <p className="mt-4 text-lg text-primary-foreground/80">
-          Share your preferences or propose a talk — every contribution helps
-          us build better events
+          Share your preferences, propose a talk, or join the community —
+          every contribution helps us build better events
         </p>
         <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Button variant="secondary" size="lg" asChild>
@@ -25,6 +35,23 @@ export function CTASection() {
           >
             <Link href="/speaker/submit">Propose a Talk</Link>
           </Button>
+          {showCommunityLink && (
+            <Button
+              variant="secondary"
+              size="lg"
+              asChild
+              className="bg-transparent border-2 border-white text-white hover:bg-white/10"
+            >
+              <a
+                href={communityLink.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {communityLink.label || `Join on ${platformLabel}`}
+              </a>
+            </Button>
+          )}
         </div>
         <p className="mt-4 text-sm text-primary-foreground/60">
           Takes 3-5 minutes &bull; Completely anonymous &bull; All fields

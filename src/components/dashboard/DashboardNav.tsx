@@ -20,6 +20,7 @@ import {
   Users,
   CalendarDays,
   Mic2,
+  Settings,
   Menu,
 } from "lucide-react";
 
@@ -32,6 +33,7 @@ const navItems = [
   { href: "/dashboard/demographics", label: "Demographics", icon: Users },
   { href: "/dashboard/meetups", label: "Meetups", icon: CalendarDays },
   { href: "/dashboard/speakers", label: "Speakers", icon: Mic2 },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 interface DashboardNavProps {

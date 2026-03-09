@@ -312,6 +312,27 @@ export interface Database {
           referencedColumns: ["id"];
         }];
       };
+      site_settings: {
+        Row: {
+          id: string;
+          key: string;
+          value: Record<string, unknown>;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          key: string;
+          value: Record<string, unknown>;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          value?: Record<string, unknown>;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;

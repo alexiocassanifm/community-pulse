@@ -1,10 +1,19 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/config/site"
+import type { CommunityLinkValue } from "@/types/settings"
 
-export function HeroSection() {
+interface HeroSectionProps {
+  communityLink?: CommunityLinkValue | null;
+}
+
+export function HeroSection({ communityLink }: HeroSectionProps) {
+  const showCommunityLink = communityLink?.enabled && communityLink.url;
+  const platformLabel =
+    communityLink?.platform === "whatsapp" ? "WhatsApp" : "Telegram";
+
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--hero-bg)]">
       {/* Decorative background elements */}
@@ -33,7 +42,7 @@ export function HeroSection() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-[var(--hero-text)]/70 sm:text-xl md:text-2xl">
-          Share your preferences anonymously or propose a talk —
+          Join the community, share your preferences, or propose a talk —
           help us create events you&apos;ll love.
         </p>
 
@@ -58,6 +67,23 @@ export function HeroSection() {
               Propose a Talk
             </Link>
           </Button>
+          {showCommunityLink && (
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-12 border-[var(--hero-accent)] px-8 text-base font-semibold text-[var(--hero-accent)] hover:bg-[var(--hero-accent)]/10"
+            >
+              <a
+                href={communityLink.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="mr-2 h-5 w-5" />
+                {communityLink.label || `Join on ${platformLabel}`}
+              </a>
+            </Button>
+          )}
         </div>
 
         <p className="mt-6 text-sm text-[var(--hero-text)]/50">

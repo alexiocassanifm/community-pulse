@@ -14,10 +14,8 @@ import { useState } from "react";
 import { siteConfig } from "@/config/site";
 
 const NAV_LINKS = [
-  { label: "Why Share", href: "#why-share" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "What We Collect", href: "#what-we-collect" },
-  { label: "Privacy", href: "#privacy" },
+  { label: "Get Involved", href: "#get-involved" },
+  { label: "Speakers", href: "#call-for-speakers" },
   { label: "FAQ", href: "#faq" },
 ];
 

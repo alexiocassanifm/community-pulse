@@ -215,11 +215,16 @@ export function SpeakerForm() {
                     {meetups.map((m) => (
                       <SelectItem key={m.id} value={m.id}>
                         {m.title} —{" "}
-                        {new Date(m.date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                        {m.luma_url
+                          ? new Date(m.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : new Date(m.date).toLocaleDateString("en-US", {
+                              month: "long",
+                              year: "numeric",
+                            })}
                       </SelectItem>
                     ))}
                   </SelectContent>

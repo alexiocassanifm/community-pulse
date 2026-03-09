@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { createServerClient } from "@/lib/supabase/server";
 
 async function fetchMeetups() {
@@ -31,15 +32,20 @@ export async function UpcomingMeetupsSection() {
             <div key={meetup.id} className="rounded-lg border bg-card p-6 shadow-sm">
               <h3 className="text-xl font-semibold">{meetup.title}</h3>
               <p className="text-muted-foreground mt-2">
-                {new Date(meetup.date).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {meetup.luma_url
+                  ? new Date(meetup.date).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : new Date(meetup.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                    })}
               </p>
               <p className="text-muted-foreground">{meetup.location}</p>
-              {meetup.luma_url && (
+              {meetup.luma_url ? (
                 <a
                   href={meetup.luma_url}
                   target="_blank"
@@ -48,6 +54,8 @@ export async function UpcomingMeetupsSection() {
                 >
                   View on Luma →
                 </a>
+              ) : (
+                <Badge variant="secondary" className="mt-4">Coming Soon</Badge>
               )}
             </div>
           ))}

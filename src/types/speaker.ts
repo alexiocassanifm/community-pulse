@@ -13,6 +13,7 @@ export interface SpeakerSubmissionRow {
   anything_else: string | null;
   status: SpeakerStatus;
   assigned_meetup: string | null;
+  preferred_meetup: string | null;
   access_token: string;
   token_revoked: boolean;
   created_at: string;
@@ -27,6 +28,7 @@ export interface SpeakerSubmissionInsert {
   ai_tools_experience: string;
   title_company?: string | null;
   anything_else?: string | null;
+  preferred_meetup?: string | null;
 }
 
 export interface SpeakerMessageRow {

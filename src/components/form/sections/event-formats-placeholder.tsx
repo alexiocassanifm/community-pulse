@@ -5,8 +5,7 @@ import { AnonymousFormData } from "@/lib/validations/form-schema";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { EVENT_FORMATS, HYBRID_OPTIONS } from "@/constants/event-formats";
+import { EVENT_FORMATS } from "@/constants/event-formats";
 
 interface EventFormatsSectionProps {
   form: UseFormReturn<AnonymousFormData>;
@@ -21,7 +20,6 @@ export function EventFormatsSection({ form }: EventFormatsSectionProps) {
   const formatNetworking = watch("event_formats.format_networking") || false;
   const formatHackathons = watch("event_formats.format_hackathons") || false;
   const formatMentoring = watch("event_formats.format_mentoring") || false;
-  const formatHybrid = watch("event_formats.format_hybrid") || "";
   const formatCustom = watch("event_formats.format_custom") || "";
 
   const getFormatValue = (formatId: string): boolean => {

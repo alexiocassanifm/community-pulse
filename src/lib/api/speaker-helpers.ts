@@ -31,7 +31,7 @@ export async function validateZodBody<T>(
     }
 
     return { data: parsed.data, rawBody: body, error: null };
-  } catch (error) {
+  } catch {
     return {
       data: null,
       rawBody: null,

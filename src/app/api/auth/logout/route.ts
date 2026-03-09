@@ -2,7 +2,7 @@ import { createAuthClient } from "@/lib/supabase/auth-server";
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // CSRF protection: verify Origin header matches our host
     const headersList = await headers();

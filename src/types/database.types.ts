@@ -144,6 +144,7 @@ export interface Database {
           anything_else: string | null;
           status: string;
           assigned_meetup: string | null;
+          preferred_meetup: string | null;
           access_token: string;
           token_revoked: boolean;
           created_at: string;
@@ -160,6 +161,7 @@ export interface Database {
           anything_else?: string | null;
           status?: string;
           assigned_meetup?: string | null;
+          preferred_meetup?: string | null;
           access_token?: string;
           token_revoked?: boolean;
           created_at?: string;
@@ -175,6 +177,7 @@ export interface Database {
           title_company?: string | null;
           anything_else?: string | null;
           assigned_meetup?: string | null;
+          preferred_meetup?: string | null;
           status?: string;
           access_token?: string;
           token_revoked?: boolean;
@@ -246,6 +249,42 @@ export interface Database {
           referencedRelation: "speaker_submissions";
           referencedColumns: ["id"];
         }];
+      };
+      meetups: {
+        Row: {
+          id: string;
+          title: string;
+          date: string;
+          location: string;
+          luma_url: string | null;
+          homepage_visible: boolean;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          date: string;
+          location: string;
+          luma_url?: string | null;
+          homepage_visible?: boolean;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          date?: string;
+          location?: string;
+          luma_url?: string | null;
+          homepage_visible?: boolean;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       organizers: {
         Row: {

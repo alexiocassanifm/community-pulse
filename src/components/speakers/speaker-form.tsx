@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -27,10 +27,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SpeakerSubmissionSuccess } from "@/components/speakers/speaker-submission-success";
+import type { MeetupRow } from "@/types/meetup";
 
 export function SpeakerForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [meetups, setMeetups] = useState<MeetupRow[]>([]);
+
+  useEffect(() => {
+    fetch("/api/meetups")
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setMeetups)
+      .catch(() => {});
+  }, []);
 
   const form = useForm<SpeakerSubmissionFormData>({
     resolver: zodResolver(speakerSubmissionSchema),
@@ -41,6 +50,7 @@ export function SpeakerForm() {
       format: undefined,
       ai_tools_experience: "",
       title_company: "",
+      preferred_meetup: "",
       anything_else: "",
     },
   });
@@ -182,6 +192,43 @@ export function SpeakerForm() {
             </FormItem>
           )}
         />
+
+        {meetups.length > 0 && (
+          <FormField
+            control={form.control}
+            name="preferred_meetup"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Preferred meetup{" "}
+                  <span className="text-muted-foreground font-normal">
+                    (optional)
+                  </span>
+                </FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="No preference" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {meetups.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.title} —{" "}
+                        {new Date(m.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}

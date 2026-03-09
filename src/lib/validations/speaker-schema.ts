@@ -13,6 +13,7 @@ export const speakerSubmissionSchema = z.object({
     .max(2000),
   title_company: z.string().max(200).optional().or(z.literal("")),
   anything_else: z.string().max(2000).optional().or(z.literal("")),
+  preferred_meetup: z.string().uuid().optional().or(z.literal("")),
 });
 
 export type SpeakerSubmissionFormData = z.infer<typeof speakerSubmissionSchema>;

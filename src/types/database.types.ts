@@ -7,6 +7,7 @@ export type Json =
   | Json[];
 
 export type ProfessionalBackground = 'tech' | 'business' | 'design' | 'other';
+export type SpeakerInvitationStatus = 'pending' | 'accepted' | 'expired' | 'declined';
 export type ExperienceLevel = 'junior' | 'mid' | 'senior' | 'lead' | 'executive';
 export type PreferredTime = 'morning' | 'afternoon' | 'evening' | 'flexible';
 export type Frequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly';
@@ -329,6 +330,45 @@ export interface Database {
           id?: string;
           key?: string;
           value?: Record<string, unknown>;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      speaker_invitations: {
+        Row: {
+          id: string;
+          email: string;
+          token: string;
+          event_id: string | null;
+          status: SpeakerInvitationStatus;
+          expires_at: string;
+          personal_message: string | null;
+          invited_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          token?: string;
+          event_id?: string | null;
+          status?: SpeakerInvitationStatus;
+          expires_at?: string;
+          personal_message?: string | null;
+          invited_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          token?: string;
+          event_id?: string | null;
+          status?: SpeakerInvitationStatus;
+          expires_at?: string;
+          personal_message?: string | null;
+          invited_by?: string | null;
+          created_at?: string;
           updated_at?: string;
         };
         Relationships: [];

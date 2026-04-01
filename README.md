@@ -14,6 +14,42 @@ Community events organizer app. Collects anonymous attendee preferences, manages
 - **Admin dashboard** — Analytics charts (demographics, trends, availability heatmap, topics, formats), speaker and meetup management, site settings
 - **Email notifications** — Automated speaker emails (confirmation, status changes, new messages) via Resend
 
+## Getting Started
+
+```bash
+npm run setup
+```
+
+This single command copies `.env.local.example` to `.env.local` (without overwriting an existing file) and installs all dependencies. It is idempotent — safe to re-run.
+
+After setup, fill in your credentials in `.env.local`, then start the dev server:
+
+```bash
+npm run dev
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Required | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Required | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Required | Supabase service role key (server-side only) |
+| `RESEND_API_KEY` | Optional | Email delivery — skipped if not set |
+| `EMAIL_FROM` | Optional | Sender address for emails |
+| `ADMIN_NOTIFICATION_EMAIL` | Optional | Recipient for admin alerts |
+| `NEXT_PUBLIC_APP_URL` | Required | App base URL (use `http://localhost:3000` locally) |
+| `NEXT_PUBLIC_COMMUNITY_NAME` | Optional | Branding — defaults to generic values |
+
+### Available Commands
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server at http://localhost:3000 |
+| `npm run build` | Production build |
+| `npm run lint` | Run ESLint on `src/` |
+| `npm run test:e2e` | Run Playwright end-to-end tests |
+
 ## Built With
 
 This project was designed and governed with [Fairmind](https://fairmind.ai) AI agents and developed with [Claude Code](https://claude.ai/code) by Anthropic.

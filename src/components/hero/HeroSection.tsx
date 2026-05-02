@@ -24,15 +24,37 @@ export function HeroSection({ communityLink }: HeroSectionProps) {
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-24 text-center sm:px-6 lg:px-8">
-        <div className="mx-auto mb-10 w-48 sm:w-56 md:w-64">
-          <Image
-            src="/community-logo.jpeg"
-            alt={`${siteConfig.communityName} logo`}
-            width={512}
-            height={512}
-            className="rounded-2xl shadow-2xl"
-            priority
-          />
+        <div className="mx-auto mb-10 flex items-center justify-center gap-4 sm:gap-6 md:gap-8">
+          <div className="w-28 sm:w-36 md:w-44">
+            <Image
+              src="/community-logo.jpeg"
+              alt={`${siteConfig.communityName} logo`}
+              width={512}
+              height={512}
+              className="rounded-2xl shadow-2xl"
+              priority
+            />
+          </div>
+          <div className="w-28 sm:w-36 md:w-44">
+            <Image
+              src="/turin.png"
+              alt="Claude Meetup Turin logo"
+              width={1080}
+              height={1080}
+              className="rounded-2xl shadow-2xl"
+              priority
+            />
+          </div>
+          <div className="w-28 sm:w-36 md:w-44">
+            <Image
+              src="/roncade.png"
+              alt="Claude Meetup Roncade logo"
+              width={1080}
+              height={1080}
+              className="rounded-2xl shadow-2xl"
+              priority
+            />
+          </div>
         </div>
 
         <h1 className="text-4xl font-extrabold tracking-tight text-[var(--hero-text)] sm:text-5xl md:text-6xl lg:text-7xl">

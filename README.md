@@ -5,6 +5,38 @@
 
 Community events organizer app. Collects anonymous attendee preferences, manages speaker submissions, and provides an admin analytics dashboard.
 
+## Getting Started
+
+```bash
+git clone <repo-url>
+cd community-pulse
+npm run setup
+```
+
+`npm run setup` copies `.env.local.example` to `.env.local` (without overwriting an existing file) and runs `npm install`. Fill in the credentials in `.env.local` before starting the dev server.
+
+### Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Required | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Required | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Required | Supabase service role key (server-side only) |
+| `RESEND_API_KEY` | Optional | Email delivery — skipped if not set |
+| `EMAIL_FROM` | Optional | Sender address for emails |
+| `ADMIN_NOTIFICATION_EMAIL` | Optional | Recipient for admin alerts |
+| `NEXT_PUBLIC_APP_URL` | Required | App base URL (use `http://localhost:3000` locally) |
+| `NEXT_PUBLIC_COMMUNITY_NAME` | Optional | Branding — defaults to generic values |
+
+### Available Commands
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server at http://localhost:3000 |
+| `npm run build` | Production build |
+| `npm run lint` | Run ESLint on `src/` |
+| `npm run test:e2e` | Run Playwright end-to-end tests (headless) |
+
 ## Features
 
 - **Meetup management** — Create, edit, and publish meetups from the dashboard; upcoming meetups shown on homepage with Luma registration link or "Coming Soon" badge
